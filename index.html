@@ -11,28 +11,31 @@
     <link rel="shortcut icon" type="image/ico" href="assets/favicon.ico" />
     <style>
     /* =============================================================
-       Stremio VIDAA TV — Nyx Player Theme v2
-       Based on extracted Nyx Player design tokens (133 CSS vars)
-       Optimised for ARM TV GPUs: no backdrop-filter on cards,
-       specific transition properties only, large 10-foot UI
+       Stremio VIDAA TV — Nyx Player Theme v3
+       Complete CSS rewrite based on Nyx Player design system
+       Optimised for Chromium 88 / ARM MediaTek MT9900 GPU
+       D-pad navigation with high-visibility focus states
        ============================================================= */
 
-    /* ----- 0. DESIGN TOKENS (from Nyx Player :root) ----- */
+    /* ----- 0. DESIGN TOKENS ----- */
     :root {
-        /* Backgrounds */
+        /* Base palette */
         --nyx-bg-main: #020a19;
         --nyx-bg-gradient: radial-gradient(ellipse 70% 140% at 0% 30%, rgba(104,23,23,.32) 0%, rgba(104,23,23,.1) 40%, transparent 70%),
                           radial-gradient(ellipse 140% 70% at 70% 100%, rgba(40,40,163,.3) 0%, rgba(40,40,163,.09) 40%, transparent 70%),
                           radial-gradient(ellipse 90% 90% at 0% 100%, rgba(74,16,96,.25) 0%, rgba(74,16,96,.07) 35%, transparent 60%),
                           radial-gradient(ellipse 50% 50% at 50% 45%, rgba(2,10,25,.85) 0%, transparent 75%),
                           #020a19;
+
+        /* Surfaces — no backdrop-filter versions for perf */
         --nyx-surface-base: #020a19;
         --nyx-surface-raised: rgba(15,15,20,.45);
         --nyx-surface-modal: rgba(25,28,45,.8);
         --nyx-surface-overlay: rgba(0,0,0,.6);
         --nyx-surface-whisper: rgba(255,255,255,.03);
+        --nyx-surface-card: rgba(33,38,45,.3);
 
-        /* Glass */
+        /* Glass — used sparingly (modals, player only) */
         --nyx-glass-bg-light: rgba(15,15,20,.25);
         --nyx-glass-bg: rgba(15,15,15,.45);
         --nyx-glass-bg-medium: rgba(15,15,20,.45);
@@ -41,9 +44,6 @@
         --nyx-glass-border: rgba(255,255,255,.08);
         --nyx-glass-blur: blur(12px) saturate(160%);
         --nyx-glass-blur-strong: blur(24px) saturate(180%);
-
-        /* Cards */
-        --nyx-card-bg: rgba(33,38,45,.3);
 
         /* Borders */
         --nyx-border-subtle: rgba(255,255,255,.06);
@@ -58,14 +58,19 @@
         --nyx-text-disabled: rgba(255,255,255,.3);
         --nyx-text-icon: rgba(255,255,255,.4);
 
-        /* Accent — using Stremio purple */
+        /* Brand — Nyx red as primary, purple as accent */
+        --nyx-brand: #e50914;
+        --nyx-brand-hover: #ff1a25;
+        --nyx-brand-subtle: rgba(229,9,20,.15);
+        --nyx-brand-glow: 0 0 20px rgba(229,9,20,.4);
         --nyx-accent: #7b5bf5;
         --nyx-accent-hover: #6a4de0;
         --nyx-accent-subtle: rgba(123,91,245,.15);
         --nyx-accent-glow: 0 0 20px rgba(123,91,245,.4);
 
-        /* Nyx native accents (for info/secondary uses) */
-        --nyx-blue: #58a6ff;
+        /* Nyx palette accents */
+        --nyx-blue: #2828a3;
+        --nyx-blue-light: #5e6fea;
         --nyx-violet: #4a4ad0;
         --nyx-violet-subtle: rgba(74,74,208,.06);
 
@@ -75,7 +80,7 @@
         --nyx-warning: #f59e0b;
         --nyx-info: #58a6ff;
 
-        /* Typography */
+        /* Typography — PlusJakartaSans already loaded by Stremio */
         --nyx-font: 'PlusJakartaSans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         --nyx-text-xs: .75rem;
         --nyx-text-sm: .8125rem;
@@ -91,13 +96,14 @@
         --nyx-leading-normal: 1.5;
         --nyx-leading-relaxed: 1.6;
 
-        /* Spacing */
+        /* Spacing (4px base grid) */
         --nyx-sp-1: .25rem;
         --nyx-sp-2: .5rem;
         --nyx-sp-3: .75rem;
         --nyx-sp-4: 1rem;
         --nyx-sp-5: 1.25rem;
         --nyx-sp-6: 1.5rem;
+        --nyx-sp-7: 1.75rem;
         --nyx-sp-8: 2rem;
         --nyx-sp-10: 2.5rem;
         --nyx-sp-12: 3rem;
@@ -111,6 +117,7 @@
         --nyx-radius-xl: 1rem;
         --nyx-radius-2xl: 1.5rem;
         --nyx-radius-pill: 2rem;
+        --nyx-radius-sidebar: 2.5rem;
 
         /* Shadows */
         --nyx-shadow-sm: 0 2px 8px rgba(0,0,0,.2);
@@ -118,11 +125,11 @@
         --nyx-shadow-lg: 0 8px 32px rgba(0,0,0,.4);
         --nyx-shadow-xl: 0 12px 48px rgba(0,0,0,.6);
 
-        /* Overlays */
+        /* Hover/active overlays */
         --nyx-hover-overlay: rgba(255,255,255,.06);
         --nyx-active-overlay: rgba(255,255,255,.1);
 
-        /* Animation */
+        /* Animation — GPU-friendly */
         --nyx-ease-out: cubic-bezier(.4,0,.2,1);
         --nyx-ease-bounce: cubic-bezier(.34,1.56,.64,1);
         --nyx-ease-spring: cubic-bezier(.4,0,.2,1.2);
@@ -130,9 +137,11 @@
         --nyx-duration-normal: .25s;
         --nyx-duration-slow: .4s;
 
-        /* Layout */
-        --nyx-sidebar-w: 60px;
-        --nyx-toolbar-bg: rgba(22,27,34,.4);
+        /* Sidebar layout — Nyx floating pill (5.5rem wide, 1.5rem margin) */
+        --nyx-sidebar-w: 5.5rem;
+        --nyx-sidebar-m: 1.5rem;
+        --nyx-sidebar-safe: calc(var(--nyx-sidebar-w) + var(--nyx-sidebar-m) * 2);
+        --nyx-content-pad: var(--nyx-sp-8);
     }
 
     /* ----- 1. GLOBAL RESET & THEME ----- */
@@ -154,32 +163,46 @@
         min-height: 100vh !important;
     }
 
-    #root * {
+    /* Theme border color on inner elements (targeted, not *) */
+    #root div, #root section, #root article, #root aside, #root nav {
         border-color: var(--nyx-border-subtle) !important;
     }
 
-    /* ----- 2. FOCUS RING — D-pad visible (preserved) ----- */
-    [focused], :focus {
-        outline: 2px solid var(--nyx-accent) !important;
-        outline-offset: 2px !important;
-    }
-    button:focus {
-        outline: 3px solid #a78bfa !important;
-        outline-offset: 2px !important;
-    }
+    /* ----- 2. FOCUS RING — D-pad high visibility ----- */
+    /* Primary focus: bold purple ring for all focusable elements */
+    [focused],
     :focus-visible {
+        outline: 3px solid var(--nyx-accent) !important;
+        outline-offset: 3px !important;
+    }
+
+    :focus {
         outline: 2px solid var(--nyx-accent) !important;
         outline-offset: 2px !important;
     }
+
+    /* Buttons get slightly thicker ring */
+    button:focus,
+    button[focused],
+    [role="button"]:focus,
+    [role="button"][focused] {
+        outline: 3px solid #a78bfa !important;
+        outline-offset: 3px !important;
+    }
+
+    /* Override Stremio's focused attribute styling */
     [focused] {
         outline-color: var(--nyx-accent) !important;
     }
 
     /* ----- 3. SCROLLBARS (hidden for TV) ----- */
     ::-webkit-scrollbar { width: 0 !important; height: 0 !important; }
-    * { scrollbar-width: none !important; }
+    body, #root, .page-jI4PO, .home-qPkGc, .details-omgjE, .details-d5pag,
+    .discover-sKRNy, .search-guyhx, .library-J0Lti, .settings-jvCLz {
+        scrollbar-width: none !important;
+    }
 
-    /* ----- 4. INTERACTIVE TRANSITIONS (specific props only) ----- */
+    /* ----- 4. INTERACTIVE TRANSITIONS (GPU-composited props only) ----- */
     a, button, [focused], [tabindex] {
         transition: background-color var(--nyx-duration-fast) var(--nyx-ease-out),
                     opacity var(--nyx-duration-fast) var(--nyx-ease-out),
@@ -188,98 +211,128 @@
                     border-color var(--nyx-duration-fast) var(--nyx-ease-out) !important;
     }
 
-    /* ----- 5. NAVBAR → LEFT SIDEBAR (Nyx style) ----- */
+    /* ===================================================================
+       5. NAVBAR → FLOATING PILL SIDEBAR (Nyx main sidebar)
+       Nyx: 5.5rem wide, 1.5rem margin from edges, border-radius 2.5rem
+       No backdrop-filter (ARM GPU perf) — solid dark glass instead
+       =================================================================== */
     .navbar-NNb1c {
         position: fixed !important;
-        left: 0 !important;
-        top: 0 !important;
-        bottom: 0 !important;
+        left: var(--nyx-sidebar-m) !important;
+        top: var(--nyx-sidebar-m) !important;
+        bottom: var(--nyx-sidebar-m) !important;
         right: auto !important;
         width: var(--nyx-sidebar-w) !important;
-        height: 100vh !important;
+        height: calc(100vh - var(--nyx-sidebar-m) * 2) !important;
         flex-direction: column !important;
         display: flex !important;
+        align-items: center !important;
         z-index: 1000 !important;
-        background: var(--nyx-glass-bg-heavy) !important;
-        border-right: 1px solid var(--nyx-glass-border) !important;
-        border-bottom: none !important;
-        border-radius: 0 var(--nyx-radius-2xl) var(--nyx-radius-2xl) 0 !important;
-        padding: 0 !important;
+        /* Solid glass look without backdrop-filter for ARM perf */
+        background: rgba(15,15,20,.55) !important;
+        border: 1px solid rgba(255,255,255,.05) !important;
+        border-radius: var(--nyx-radius-sidebar) !important;
+        padding: var(--nyx-sp-6) 0 !important;
         overflow: hidden !important;
+        box-shadow: 0 0 40px rgba(0,0,0,.3) !important;
         transition: background-color var(--nyx-duration-slow) var(--nyx-ease-out),
                     border-color var(--nyx-duration-slow) var(--nyx-ease-out) !important;
     }
 
+    /* Subtle hover lift on sidebar */
     .navbar-NNb1c:hover {
-        background: rgba(20,20,25,.6) !important;
-        border-color: var(--nyx-border-glass) !important;
+        background: rgba(20,20,28,.65) !important;
+        border-color: rgba(255,255,255,.08) !important;
     }
 
+    /* Hide navbar's native background layers */
     .navbar-NNb1c .background-xaXYe {
         background: transparent !important;
+        display: none !important;
     }
 
     .navbar-NNb1c .backdrop-H4Hka {
         display: none !important;
     }
 
+    /* Content wrapper — vertical flex layout */
     .navbar-NNb1c .content-IjaqZ {
         flex-direction: column !important;
         display: flex !important;
         height: 100% !important;
         width: 100% !important;
-        padding: var(--nyx-sp-4) 0 !important;
+        padding: 0 !important;
         align-items: center !important;
         justify-content: flex-start !important;
     }
 
-    /* Logo in sidebar */
+    /* Logo in sidebar — Nyx style (2.5rem, centered, glow) */
     .navbar-NNb1c .logo-lCpuw {
-        width: 34px !important;
-        height: 34px !important;
-        margin: var(--nyx-sp-2) auto var(--nyx-sp-6) auto !important;
+        width: 2.5rem !important;
+        height: 2.5rem !important;
+        margin: 0 auto var(--nyx-sp-8) auto !important;
         display: block !important;
+        flex-shrink: 0 !important;
         filter: drop-shadow(0 0 .5rem rgba(255,255,255,.15)) !important;
+        object-fit: contain !important;
     }
 
+    /* Hide heading text */
     .navbar-NNb1c .heading-QbiVt {
         display: none !important;
     }
 
-    /* Tabs stack vertically */
+    /* Tab list — vertical stack with centered items, Nyx gap of 1.25rem */
     .tabs-wr1wR {
         flex-direction: column !important;
         display: flex !important;
         align-items: center !important;
-        gap: var(--nyx-sp-1) !important;
+        justify-content: center !important;
+        flex: 1 !important;
+        gap: var(--nyx-sp-5) !important;
         width: 100% !important;
         padding: 0 !important;
     }
 
-    /* Individual tab — icon only, Nyx nav-item style */
+    /* Individual tab — Nyx nav-item: 3.5rem round circle, icon centered */
     .tab-jVZYR {
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
-        width: 44px !important;
-        height: 44px !important;
-        border-radius: var(--nyx-radius-lg) !important;
+        width: 3.5rem !important;
+        height: 3.5rem !important;
+        border-radius: 50% !important;
         padding: 0 !important;
-        margin: 2px 0 !important;
+        margin: 0 !important;
         background: transparent !important;
         position: relative !important;
         border: none !important;
+        outline: none !important;
+        cursor: pointer !important;
+        transition: transform var(--nyx-duration-normal) var(--nyx-ease-out),
+                    background-color var(--nyx-duration-normal) var(--nyx-ease-out) !important;
     }
 
+    /* Hide tab label text — icon only */
     .tab-jVZYR .label-l7NFN {
         display: none !important;
     }
 
+    /* Tab icon — Nyx: 1.5rem, muted by default */
     .tab-jVZYR .icon-SZKt5 {
-        width: 22px !important;
-        height: 22px !important;
-        opacity: 0.5 !important;
-        transition: opacity var(--nyx-duration-fast) var(--nyx-ease-out) !important;
+        width: 1.5rem !important;
+        height: 1.5rem !important;
+        opacity: 0.4 !important;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,.5)) !important;
+        transition: opacity var(--nyx-duration-normal) var(--nyx-ease-out),
+                    filter var(--nyx-duration-normal) var(--nyx-ease-out) !important;
+    }
+
+    /* Hover / focus — Nyx hover: white bg + scale */
+    .tab-jVZYR:hover,
+    .tab-jVZYR[focused] {
+        background: rgba(255,255,255,.08) !important;
+        transform: scale(1.1) !important;
     }
 
     .tab-jVZYR:hover .icon-SZKt5,
@@ -287,40 +340,42 @@
         opacity: 1 !important;
     }
 
-    .tab-jVZYR:hover,
-    .tab-jVZYR[focused] {
-        background: var(--nyx-accent-subtle) !important;
-        box-shadow: none !important;
-    }
-
-    /* Selected tab — purple accent bar (Nyx active indicator) */
+    /* Selected tab — Nyx active: red glow behind icon */
     .tab-jVZYR.selected-L5m7b {
-        background: rgba(123,91,245,.18) !important;
+        background: transparent !important;
     }
 
     .tab-jVZYR.selected-L5m7b .icon-SZKt5 {
         opacity: 1 !important;
-        filter: drop-shadow(0 0 4px rgba(123,91,245,.5)) !important;
+        filter: drop-shadow(0 0 4px rgba(255,255,255,.25)) !important;
     }
 
+    /* Red glow indicator behind active tab (Nyx active-glow) */
     .tab-jVZYR.selected-L5m7b::before {
         content: '' !important;
         position: absolute !important;
-        left: 0 !important;
         top: 50% !important;
-        transform: translateY(-50%) !important;
-        width: 3px !important;
-        height: 22px !important;
-        background: var(--nyx-accent) !important;
-        border-radius: 0 3px 3px 0 !important;
-        box-shadow: var(--nyx-accent-glow) !important;
+        left: 50% !important;
+        transform: translate(-50%, -50%) !important;
+        width: 2.5rem !important;
+        height: 2.5rem !important;
+        background: radial-gradient(circle, rgba(229,9,20,.8), rgba(180,7,16,.25)) !important;
+        border-radius: 50% !important;
+        z-index: -1 !important;
+        filter: blur(8px) !important;
+        opacity: 0.7 !important;
     }
 
-    /* Push main content right to clear sidebar */
+    /* ===================================================================
+       5b. CONTENT OFFSET — Push all pages right to clear sidebar
+       =================================================================== */
+    /* Main content containers — offset by sidebar safe zone */
     #root > div > div:not(.navbar-NNb1c):not(.player-SmYw4) {
-        margin-left: var(--nyx-sidebar-w) !important;
+        margin-left: var(--nyx-sidebar-safe) !important;
+        width: calc(100% - var(--nyx-sidebar-safe)) !important;
     }
 
+    /* Reset inner page margins (they sit inside the offset container) */
     .page-jI4PO,
     .home-qPkGc,
     .discover-sKRNy,
@@ -331,12 +386,16 @@
         padding-left: 0 !important;
     }
 
-    /* ----- 6. HOME PAGE ----- */
+    /* ===================================================================
+       6. HOME PAGE — Clean catalog rows, no hero conflict
+       =================================================================== */
     .home-qPkGc {
         background-color: transparent !important;
         background: transparent !important;
         width: 100% !important;
-        padding: 0 !important;
+        padding: var(--nyx-sp-6) 0 0 0 !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
     }
 
     .home-qPkGc .content-BPvBy {
@@ -345,22 +404,29 @@
         max-width: 100% !important;
     }
 
-    /* Catalog row sections */
+    /* Catalog row sections — consistent horizontal padding */
     .catalog-Aq3BF {
-        padding: 0 var(--nyx-sp-8) !important;
-        margin-bottom: var(--nyx-sp-6) !important;
+        padding: 0 var(--nyx-content-pad) !important;
+        margin-bottom: var(--nyx-sp-8) !important;
     }
 
+    /* Catalog title — bold, readable */
     .catalog-Aq3BF .title-EqKoF {
         font-size: var(--nyx-text-xl) !important;
         font-weight: 700 !important;
         color: var(--nyx-text-primary) !important;
-        margin-bottom: var(--nyx-sp-3) !important;
+        margin-bottom: var(--nyx-sp-4) !important;
         padding-left: var(--nyx-sp-2) !important;
         letter-spacing: -0.01em !important;
+        line-height: var(--nyx-leading-tight) !important;
+        white-space: nowrap !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
     }
 
-    /* ----- 7. DETAILS PAGE — FULL-BLEED CINEMATIC ----- */
+    /* ===================================================================
+       7. DETAILS PAGE — Cinematic full-bleed backdrop
+       =================================================================== */
     .details-omgjE,
     .details-d5pag {
         position: relative !important;
@@ -372,7 +438,7 @@
         padding: 0 !important;
     }
 
-    /* Backdrop image — 60vh for TV (Nyx uses 85vh) */
+    /* Backdrop image — 60vh coverage for TV viewing distance */
     .details-omgjE .background-G0atu,
     .details-d5pag .background-G0atu {
         position: absolute !important;
@@ -390,11 +456,11 @@
         width: 100% !important;
         height: 100% !important;
         object-fit: cover !important;
-        mask-image: linear-gradient(to bottom, black 0%, black 55%, rgba(0,0,0,.5) 80%, transparent 100%) !important;
-        -webkit-mask-image: linear-gradient(to bottom, black 0%, black 55%, rgba(0,0,0,.5) 80%, transparent 100%) !important;
+        mask-image: linear-gradient(to bottom, black 0%, black 50%, rgba(0,0,0,.4) 75%, transparent 100%) !important;
+        -webkit-mask-image: linear-gradient(to bottom, black 0%, black 50%, rgba(0,0,0,.4) 75%, transparent 100%) !important;
     }
 
-    /* Gradient overlay (Nyx hero-overlay style) */
+    /* Gradient overlay — smooth fade to base color */
     .details-omgjE .overlay-IpSXf,
     .details-d5pag .overlay-IpSXf {
         position: absolute !important;
@@ -404,24 +470,25 @@
         height: 60vh !important;
         background: linear-gradient(to top,
             var(--nyx-bg-main) 0%,
-            rgba(2,10,25,.9) 25%,
-            rgba(2,10,25,.5) 55%,
-            rgba(2,10,25,.25) 80%,
-            rgba(2,10,25,.15) 100%) !important;
+            rgba(2,10,25,.92) 20%,
+            rgba(2,10,25,.55) 50%,
+            rgba(2,10,25,.2) 80%,
+            rgba(2,10,25,.1) 100%) !important;
         z-index: 1 !important;
     }
 
-    /* Info section — overlaid on backdrop bottom */
+    /* Info section — positioned over backdrop lower third */
     .details-omgjE .info-c3Gsa,
     .details-d5pag .info-c3Gsa {
         position: relative !important;
         z-index: 2 !important;
-        padding: 35vh var(--nyx-sp-12) var(--nyx-sp-8) var(--nyx-sp-12) !important;
+        padding: 32vh var(--nyx-sp-12) var(--nyx-sp-8) var(--nyx-sp-12) !important;
         background: transparent !important;
         max-width: 100% !important;
+        box-sizing: border-box !important;
     }
 
-    /* Title — large cinema (Nyx hero-title) */
+    /* Title — large cinema headline */
     .details-omgjE .info-c3Gsa .title-OL31B,
     .details-d5pag .info-c3Gsa .title-OL31B,
     .title-OL31B {
@@ -434,7 +501,7 @@
         margin-bottom: var(--nyx-sp-4) !important;
     }
 
-    /* Description */
+    /* Description — readable width, relaxed leading */
     .description-Vy9xR {
         font-size: var(--nyx-text-base) !important;
         line-height: var(--nyx-leading-relaxed) !important;
@@ -443,7 +510,7 @@
         margin-bottom: var(--nyx-sp-6) !important;
     }
 
-    /* Video title */
+    /* Video/episode title */
     .video-title-dEjBn {
         font-size: var(--nyx-text-lg) !important;
         font-weight: 600 !important;
@@ -469,25 +536,45 @@
         box-shadow: var(--nyx-shadow-lg) !important;
     }
 
-    /* Ratings */
+    /* Ratings row */
     .ratings-container-jMLVe {
         display: flex !important;
         gap: var(--nyx-sp-3) !important;
         margin-bottom: var(--nyx-sp-4) !important;
+        flex-wrap: wrap !important;
+        align-items: center !important;
     }
 
-    /* ----- 8. DISCOVER / BROWSE PAGE ----- */
+    /* ===================================================================
+       8. DISCOVER / BROWSE PAGE — Full-width card grid
+       =================================================================== */
     .discover-sKRNy {
         background: transparent !important;
-        padding: var(--nyx-sp-6) var(--nyx-sp-8) !important;
+        padding: var(--nyx-sp-6) var(--nyx-content-pad) !important;
         width: 100% !important;
+        box-sizing: border-box !important;
+        overflow-y: auto !important;
+        overflow-x: hidden !important;
     }
 
-    /* ----- 9. SEARCH PAGE ----- */
+    /* Fix title truncation on discover */
+    .discover-sKRNy .title-EqKoF,
+    .discover-sKRNy [class*="title"],
+    .discover-sKRNy [class*="heading"] {
+        white-space: normal !important;
+        overflow: visible !important;
+        text-overflow: unset !important;
+        max-width: 100% !important;
+    }
+
+    /* ===================================================================
+       9. SEARCH PAGE — Centered input, clean results
+       =================================================================== */
     .search-guyhx {
         background: transparent !important;
-        padding: var(--nyx-sp-6) var(--nyx-sp-8) !important;
+        padding: var(--nyx-sp-6) var(--nyx-content-pad) !important;
         width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     .search-guyhx input,
@@ -500,6 +587,7 @@
         padding: var(--nyx-sp-3) var(--nyx-sp-6) !important;
         width: 100% !important;
         max-width: 600px !important;
+        box-sizing: border-box !important;
     }
 
     .search-guyhx input:focus {
@@ -507,13 +595,25 @@
         box-shadow: 0 0 0 3px rgba(123,91,245,.2) !important;
     }
 
-    /* ----- 10. SETTINGS PAGE ----- */
+    /* ===================================================================
+       10. SETTINGS PAGE — Clean grouped options, no white gradient
+       =================================================================== */
     .settings-jvCLz {
         background: transparent !important;
-        padding: var(--nyx-sp-8) !important;
+        padding: var(--nyx-sp-8) var(--nyx-content-pad) !important;
         max-width: 100% !important;
+        box-sizing: border-box !important;
+        overflow-y: auto !important;
     }
 
+    /* Remove any gradient overlays on settings */
+    .settings-jvCLz::before,
+    .settings-jvCLz::after {
+        display: none !important;
+        background: none !important;
+    }
+
+    /* Settings option rows */
     .option-pCk4g {
         background: var(--nyx-surface-whisper) !important;
         border-radius: var(--nyx-radius-lg) !important;
@@ -542,40 +642,46 @@
         margin-bottom: 4px !important;
     }
 
+    /* Toggle switch */
     .toggle-EKrug {
         background: rgba(255,255,255,.12) !important;
         border-radius: var(--nyx-radius-pill) !important;
     }
 
-    /* ----- 11. LIBRARY PAGE ----- */
+    /* ===================================================================
+       11. LIBRARY PAGE
+       =================================================================== */
     .library-J0Lti {
         background: transparent !important;
-        padding: var(--nyx-sp-6) var(--nyx-sp-8) !important;
+        padding: var(--nyx-sp-6) var(--nyx-content-pad) !important;
         width: 100% !important;
+        box-sizing: border-box !important;
     }
 
-    /* ----- 12. CONTENT ITEM CARDS (Nyx carousel-card style) ----- */
+    /* ===================================================================
+       12. CONTENT ITEM CARDS — Nyx carousel-card style
+       Bounce scale on focus, accent ring, GPU-composited
+       =================================================================== */
     .item-_uIl6 {
         border-radius: var(--nyx-radius-lg) !important;
         overflow: hidden !important;
-        background: var(--nyx-card-bg) !important;
+        background: var(--nyx-surface-card) !important;
         border: 1px solid var(--nyx-glass-border) !important;
         position: relative !important;
         transform: translateZ(0) !important;
         will-change: transform !important;
         transition: transform var(--nyx-duration-normal) var(--nyx-ease-bounce),
-                    box-shadow var(--nyx-duration-normal) var(--nyx-ease-out),
                     border-color var(--nyx-duration-normal) var(--nyx-ease-out) !important;
     }
 
     .item-_uIl6:hover,
     .item-_uIl6[focused] {
         transform: scale(1.05) !important;
-        box-shadow: 0 0 0 2px var(--nyx-accent), 0 10px 20px rgba(0,0,0,.5) !important;
-        border-color: rgba(123,91,245,.3) !important;
+        border-color: rgba(123,91,245,.4) !important;
         z-index: 10 !important;
     }
 
+    /* Poster container */
     .poster-kFYpD {
         border-radius: var(--nyx-radius-lg) !important;
         overflow: hidden !important;
@@ -590,7 +696,9 @@
         border-radius: var(--nyx-radius-lg) !important;
     }
 
-    /* ----- 13. VIDEO / EPISODE CARDS ----- */
+    /* ===================================================================
+       13. VIDEO / EPISODE CARDS
+       =================================================================== */
     .video-xYWmH {
         background: var(--nyx-surface-whisper) !important;
         border: 1px solid var(--nyx-border-subtle) !important;
@@ -609,6 +717,7 @@
         transform: translateX(4px) !important;
     }
 
+    /* Badge indicator */
     .indicator-BeMF_ {
         background: var(--nyx-accent) !important;
         border-radius: var(--nyx-radius-md) !important;
@@ -618,13 +727,21 @@
         color: var(--nyx-text-primary) !important;
     }
 
-    /* ----- 14. STREAM CARDS ----- */
+    /* ===================================================================
+       14. STREAM CARDS — Clean layout, no overlap
+       =================================================================== */
     .stream-rpXLF {
-        background: var(--nyx-card-bg) !important;
+        background: var(--nyx-surface-card) !important;
         border: 1px solid var(--nyx-glass-border) !important;
         border-radius: var(--nyx-radius-xl) !important;
         padding: var(--nyx-sp-4) var(--nyx-sp-5) !important;
         margin-bottom: var(--nyx-sp-2) !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: var(--nyx-sp-3) !important;
+        min-height: 3.5rem !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
         transition: background-color var(--nyx-duration-fast) var(--nyx-ease-out),
                     border-color var(--nyx-duration-fast) var(--nyx-ease-out) !important;
     }
@@ -633,20 +750,39 @@
     .stream-rpXLF[focused] {
         background: rgba(123,91,245,.08) !important;
         border-color: rgba(123,91,245,.3) !important;
-        box-shadow: var(--nyx-shadow-sm) !important;
+    }
+
+    /* Fix action icons overflow in stream cards */
+    .stream-rpXLF [class*="action"],
+    .stream-rpXLF [class*="Action"],
+    .stream-rpXLF button {
+        flex-shrink: 0 !important;
+    }
+
+    /* Stream card text — prevent overflow */
+    .stream-rpXLF [class*="title"],
+    .stream-rpXLF [class*="name"],
+    .stream-rpXLF [class*="description"] {
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+        min-width: 0 !important;
     }
 
     .streams-SLRP_ {
         padding: var(--nyx-sp-2) 0 !important;
     }
 
-    /* ----- 15. PLAYER (full-screen, backdrop-filter OK here) ----- */
+    /* ===================================================================
+       15. PLAYER — Full-screen, backdrop-filter OK here
+       =================================================================== */
     .player-SmYw4 {
         position: fixed !important;
         inset: 0 !important;
         z-index: 2000 !important;
         background: #000 !important;
         margin-left: 0 !important;
+        width: 100% !important;
     }
 
     .player-SmYw4 .overlay-A6U6H {
@@ -662,6 +798,7 @@
         -webkit-backdrop-filter: blur(2px) !important;
     }
 
+    /* Player control buttons */
     .control-HLtoF {
         width: 52px !important;
         height: 52px !important;
@@ -682,6 +819,7 @@
         border-color: rgba(123,91,245,.4) !important;
     }
 
+    /* Seek bar */
     .seekbar-oerpP {
         height: 6px !important;
         border-radius: var(--nyx-radius-pill) !important;
@@ -694,7 +832,9 @@
         height: 10px !important;
     }
 
-    /* ----- 16. ITEM PREVIEW POPUP (full overlay, backdrop-filter OK) ----- */
+    /* ===================================================================
+       16. ITEM PREVIEW POPUP — Modal overlay, backdrop-filter OK
+       =================================================================== */
     .item-preview-nq13h {
         background: var(--nyx-surface-modal) !important;
         border-radius: var(--nyx-radius-2xl) !important;
@@ -719,7 +859,9 @@
         color: var(--nyx-text-muted) !important;
     }
 
-    /* ----- 17. MODALS & OVERLAYS (full-screen, backdrop-filter OK) ----- */
+    /* ===================================================================
+       17. MODALS & OVERLAYS — Full-screen, backdrop-filter OK
+       =================================================================== */
     [class*="modal"],
     [class*="Modal"],
     [class*="dialog"],
@@ -732,12 +874,14 @@
         -webkit-backdrop-filter: var(--nyx-glass-blur-strong) !important;
     }
 
-    /* Modal backdrop / overlay */
+    /* Modal backdrop */
     [class*="overlay"]:not(.overlay-A6U6H):not(.overlay-IpSXf) {
         background: var(--nyx-surface-overlay) !important;
     }
 
-    /* ----- 18. TOAST NOTIFICATIONS ----- */
+    /* ===================================================================
+       18. TOAST NOTIFICATIONS
+       =================================================================== */
     [class*="toast"],
     [class*="Toast"],
     [class*="notification"],
@@ -749,7 +893,9 @@
         color: var(--nyx-text-primary) !important;
     }
 
-    /* ----- 19. LINKS ----- */
+    /* ===================================================================
+       19. LINKS
+       =================================================================== */
     .link-ipF9m {
         color: #a78bfa !important;
         text-decoration: none !important;
@@ -760,7 +906,9 @@
         color: #c4b5fd !important;
     }
 
-    /* ----- 20. BUTTONS (Nyx glass button style) ----- */
+    /* ===================================================================
+       20. BUTTONS — Nyx glass button style
+       =================================================================== */
     button, [role="button"] {
         background: var(--nyx-glass-bg-light) !important;
         border: 1px solid var(--nyx-glass-border) !important;
@@ -798,7 +946,9 @@
         background: var(--nyx-accent-hover) !important;
     }
 
-    /* ----- 21. INPUTS (Nyx glass style) ----- */
+    /* ===================================================================
+       21. INPUTS — Nyx glass style
+       =================================================================== */
     input, textarea, select {
         background: var(--nyx-glass-bg-light) !important;
         border: 1px solid var(--nyx-border-default) !important;
@@ -813,7 +963,9 @@
         box-shadow: 0 0 0 3px rgba(123,91,245,.15) !important;
     }
 
-    /* ----- 22. PAGE SHELL ----- */
+    /* ===================================================================
+       22. PAGE SHELL — Transparent wrappers
+       =================================================================== */
     .page-jI4PO {
         background-color: transparent !important;
     }
@@ -822,7 +974,9 @@
         background-color: transparent !important;
     }
 
-    /* ----- 23. TYPOGRAPHY HIERARCHY ----- */
+    /* ===================================================================
+       23. TYPOGRAPHY HIERARCHY
+       =================================================================== */
     h1, [class*="heading"], [class*="Heading"] {
         font-weight: 800 !important;
         letter-spacing: -0.02em !important;
@@ -841,7 +995,9 @@
         color: var(--nyx-text-secondary) !important;
     }
 
-    /* ----- 24. ANIMATIONS / KEYFRAMES (from Nyx) ----- */
+    /* ===================================================================
+       24. ANIMATIONS / KEYFRAMES
+       =================================================================== */
     @keyframes fadeIn {
         from { opacity: 0; }
         to { opacity: 1; }
@@ -867,12 +1023,13 @@
         50% { box-shadow: 0 0 16px 4px rgba(123,91,245,.2); }
     }
 
-    /* Apply entrance animations */
+    /* Detail info entrance */
     .details-omgjE .info-c3Gsa,
     .details-d5pag .info-c3Gsa {
         animation: slideUp var(--nyx-duration-slow) var(--nyx-ease-out) !important;
     }
 
+    /* Preview popup entrance */
     .item-preview-nq13h {
         animation: fadeInPop var(--nyx-duration-normal) var(--nyx-ease-spring) !important;
     }
@@ -882,7 +1039,9 @@
         animation: fadeIn var(--nyx-duration-slow) var(--nyx-ease-out) !important;
     }
 
-    /* ----- 25. LOADING SKELETON (Nyx shimmer) ----- */
+    /* ===================================================================
+       25. LOADING SKELETON — Nyx shimmer effect
+       =================================================================== */
     [class*="skeleton"],
     [class*="Skeleton"],
     [class*="placeholder"],
@@ -896,13 +1055,17 @@
         border-radius: var(--nyx-radius-md) !important;
     }
 
-    /* ----- 26. SELECTION & HIGHLIGHT ----- */
+    /* ===================================================================
+       26. SELECTION & HIGHLIGHT
+       =================================================================== */
     ::selection {
         background: rgba(123,91,245,.35) !important;
         color: var(--nyx-text-primary) !important;
     }
 
-    /* ----- 27. STATUS BADGES ----- */
+    /* ===================================================================
+       27. STATUS BADGES
+       =================================================================== */
     [class*="badge"][class*="success"],
     [class*="Badge"][class*="success"] {
         background: rgba(70,211,105,.15) !important;
@@ -915,7 +1078,9 @@
         color: var(--nyx-error) !important;
     }
 
-    /* ----- 28. DROPDOWN / MENU (Nyx glass style) ----- */
+    /* ===================================================================
+       28. DROPDOWN / MENU — Nyx glass style
+       =================================================================== */
     [class*="dropdown"],
     [class*="Dropdown"],
     [class*="menu-container"],
@@ -926,7 +1091,9 @@
         box-shadow: var(--nyx-shadow-lg) !important;
     }
 
-    /* ----- 29. PROGRESS BARS ----- */
+    /* ===================================================================
+       29. PROGRESS BARS
+       =================================================================== */
     [class*="progress"],
     [class*="Progress"] {
         background: rgba(255,255,255,.08) !important;
@@ -939,9 +1106,13 @@
         border-radius: var(--nyx-radius-pill) !important;
     }
 
-    /* ----- 30. FOCUSED CARD GLOW (TV D-pad enhancement) ----- */
+    /* ===================================================================
+       30. FOCUSED ELEMENT GLOW — TV D-pad enhancement
+       Cards get a pulsing purple glow when focused via D-pad
+       =================================================================== */
     .item-_uIl6[focused] {
         animation: pulseGlow 2s ease-in-out infinite !important;
+        box-shadow: 0 0 0 2px var(--nyx-accent), 0 8px 24px rgba(0,0,0,.4) !important;
     }
 
     .stream-rpXLF[focused] {
@@ -951,6 +1122,7 @@
     .video-xYWmH[focused] {
         box-shadow: 0 0 0 2px var(--nyx-accent), var(--nyx-shadow-sm) !important;
     }
+
     </style>
     <title>Stremio - Freedom to Stream</title>
     <script>
@@ -1845,166 +2017,287 @@
     });
 })();
 </script>
+<!-- ============================================================================= -->
+<!-- STREMIO VIDAA TV — UI COMPONENTS (Replacement for lines 1848-2331) -->
+<!-- Architecture: Shared Route System + 3 Independent Component IIFEs + CSS -->
+<!-- Compatible with Chromium 88, ARM GPU, D-pad remote navigation -->
+<!-- ============================================================================= -->
+
+<!-- ----------------------------------------------------------------------------- -->
+<!-- COMPONENT CSS INJECTION -->
+<!-- Injected once, covers hero, trending, and detail pills -->
+<!-- ----------------------------------------------------------------------------- -->
 <script>
-// Hero Carousel + Trending Row for Home Page
 (function() {
-    var CINEMETA_URL = 'https://v3-cinemeta.strem.io/catalog/movie/top.json';
-    var HERO_COUNT = 5;
+    var style = document.createElement('style');
+    style.id = 'stremio-components-css';
+    style.textContent = [
+        /* Hero Carousel */
+        '#stremio-hero { position:relative; width:100%; height:75vh; overflow:hidden; flex-shrink:0; }',
+        '#stremio-hero .hero-slide { position:absolute; top:0; left:0; width:100%; height:100%; opacity:0; transition:opacity 0.8s ease; will-change:opacity; }',
+        '#stremio-hero .hero-slide.active { opacity:1; }',
+        '#stremio-hero .hero-bg { position:absolute; top:0; left:0; width:100%; height:100%; background-size:cover; background-position:center top; will-change:transform; }',
+        '@keyframes kenBurns { 0% { transform:scale(1); } 100% { transform:scale(1.08); } }',
+        '#stremio-hero .hero-slide.active .hero-bg { animation:kenBurns 12s ease-in-out alternate infinite; }',
+        '#stremio-hero .hero-grad-bottom { position:absolute; bottom:0; left:0; width:100%; height:70%; background:linear-gradient(to top, #0c0c10 0%, rgba(12,12,16,0.85) 35%, rgba(12,12,16,0.4) 65%, transparent 100%); }',
+        '#stremio-hero .hero-grad-side { position:absolute; top:0; left:0; width:55%; height:100%; background:linear-gradient(to right, rgba(12,12,16,0.85) 0%, rgba(12,12,16,0.4) 60%, transparent 100%); }',
+        '#stremio-hero .hero-content { position:absolute; bottom:5rem; left:4rem; right:45%; z-index:2; }',
+        '#stremio-hero .hero-pills { display:flex; align-items:center; gap:8px; margin-bottom:0.8rem; flex-wrap:wrap; }',
+        '#stremio-hero .hero-pill { background:rgba(255,255,255,0.1); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); color:rgba(255,255,255,0.85); padding:4px 12px; border-radius:20px; font-size:0.85rem; font-family:PlusJakartaSans,sans-serif; border:1px solid rgba(255,255,255,0.08); }',
+        '#stremio-hero .hero-pill--rating { color:#fbbf24; font-weight:600; background:rgba(251,191,36,0.12); border-color:rgba(251,191,36,0.15); }',
+        '#stremio-hero .hero-title { font-size:2.8rem; font-weight:800; color:white; margin-bottom:0.5rem; font-family:PlusJakartaSans,sans-serif; text-shadow:0 2px 12px rgba(0,0,0,0.6); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.8) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }',
+        '#stremio-hero .hero-desc { font-size:1rem; color:rgba(255,255,255,0.6); font-family:PlusJakartaSans,sans-serif; line-height:1.6; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden; margin-bottom:1.4rem; max-width:520px; }',
+        '#stremio-hero .hero-buttons { display:flex; gap:12px; }',
+        '#stremio-hero .hero-btn { border:none; padding:12px 32px; border-radius:10px; font-size:1rem; font-weight:600; cursor:pointer; font-family:PlusJakartaSans,sans-serif; transition:transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease; outline:none; }',
+        '#stremio-hero .hero-btn--primary { background:linear-gradient(135deg, #7b5bf5, #6d4de0); color:white; box-shadow:0 4px 15px rgba(123,91,245,0.3); }',
+        '#stremio-hero .hero-btn--primary:focus { transform:scale(1.05); box-shadow:0 0 0 3px rgba(167,139,250,0.5), 0 4px 20px rgba(123,91,245,0.4); }',
+        '#stremio-hero .hero-btn--secondary { background:rgba(255,255,255,0.08); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); color:white; border:1px solid rgba(255,255,255,0.15); }',
+        '#stremio-hero .hero-btn--secondary:focus { transform:scale(1.05); box-shadow:0 0 0 3px rgba(167,139,250,0.5); background:rgba(255,255,255,0.15); }',
+        '#hero-dots { position:absolute; bottom:1.5rem; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:3; }',
+        '#hero-dots .hero-dot { width:8px; height:8px; border-radius:50%; border:none; cursor:pointer; padding:0; transition:background 0.3s, width 0.3s; background:rgba(255,255,255,0.3); }',
+        '#hero-dots .hero-dot.active { background:white; width:24px; border-radius:4px; }',
+
+        /* Trending Row */
+        '#stremio-trending { padding:1.5rem 4rem 1rem 4rem; flex-shrink:0; }',
+        '#stremio-trending .trending-heading { font-size:1.3rem; font-weight:700; color:white; margin-bottom:0.8rem; font-family:PlusJakartaSans,sans-serif; display:flex; align-items:center; gap:10px; }',
+        '#stremio-trending .trending-heading .trending-accent { width:4px; height:1.3rem; background:linear-gradient(180deg, #7b5bf5, #a78bfa); border-radius:2px; }',
+        '#trending-scroll { display:flex; gap:14px; overflow-x:auto; overflow-y:hidden; scroll-behavior:smooth; padding-bottom:10px; -webkit-overflow-scrolling:touch; scrollbar-width:none; }',
+        '#trending-scroll::-webkit-scrollbar { display:none; }',
+        '.trending-card { flex:0 0 auto; width:150px; cursor:pointer; transition:transform 0.2s ease, box-shadow 0.2s ease; position:relative; border-radius:8px; outline:none; }',
+        '.trending-card:focus { transform:scale(1.08); box-shadow:0 0 0 2px #7b5bf5, 0 8px 25px rgba(0,0,0,0.4); z-index:2; }',
+        '.trending-card .card-poster { width:150px; height:225px; object-fit:cover; border-radius:8px; display:block; background:#1a1a2e; }',
+        '.trending-card .card-badge { position:absolute; top:0; left:0; font-size:0.65rem; font-weight:700; font-family:PlusJakartaSans,sans-serif; text-transform:uppercase; letter-spacing:0.5px; padding:3px 8px; color:white; }',
+        '.trending-card .card-badge--movie { background:linear-gradient(135deg, #e53e3e, #c53030); border-radius:8px 0 8px 0; }',
+        '.trending-card .card-badge--series { background:linear-gradient(135deg, #3182ce, #2b6cb0); border-radius:8px 0 8px 0; }',
+        '.trending-card .card-rating { position:absolute; top:6px; right:6px; background:rgba(0,0,0,0.7); backdrop-filter:blur(4px); -webkit-backdrop-filter:blur(4px); color:#fbbf24; padding:2px 6px; border-radius:4px; font-size:0.7rem; font-weight:600; font-family:PlusJakartaSans,sans-serif; }',
+        '.trending-card .card-title { font-size:0.82rem; color:rgba(255,255,255,0.8); margin-top:6px; font-family:PlusJakartaSans,sans-serif; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; width:150px; }',
+
+        /* Detail Pills */
+        '#stremio-detail-pills { display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin:0.5rem 0 0.8rem 0; }',
+        '#stremio-detail-pills .detail-pill { backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px); padding:5px 14px; border-radius:20px; font-size:0.85rem; font-family:PlusJakartaSans,sans-serif; border:1px solid rgba(255,255,255,0.08); }',
+        '#stremio-detail-pills .detail-pill--type { background:rgba(123,91,245,0.2); color:#a78bfa; font-weight:600; border-color:rgba(123,91,245,0.25); }',
+        '#stremio-detail-pills .detail-pill--rating { background:rgba(251,191,36,0.12); color:#fbbf24; font-weight:600; border-color:rgba(251,191,36,0.15); }',
+        '#stremio-detail-pills .detail-pill--default { background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.7); }',
+        '#stremio-detail-pills .detail-pill--genre { background:rgba(255,255,255,0.04); color:rgba(255,255,255,0.55); }'
+    ].join('\n');
+    document.head.appendChild(style);
+})();
+</script>
+
+<!-- ----------------------------------------------------------------------------- -->
+<!-- SHARED ROUTE SYSTEM -->
+<!-- Single setInterval that dispatches to registered component handlers -->
+<!-- ----------------------------------------------------------------------------- -->
+<script>
+(function() {
+    'use strict';
+
+    // Route registry — components register their handlers here
+    window.__ROUTE_HANDLERS__ = window.__ROUTE_HANDLERS__ || [];
+
+    var lastHash = '';
+    var lastRoute = '';
+
+    function classifyRoute(hash) {
+        if (!hash || hash === '#/' || hash === '#/home' || hash.indexOf('#/board') === 0) return 'home';
+        if (hash.indexOf('#/detail/') === 0) return 'detail';
+        return 'other';
+    }
+
+    setInterval(function() {
+        var hash = window.location.hash || '';
+        var route = classifyRoute(hash);
+        var changed = (route !== lastRoute);
+        var hashChanged = (hash !== lastHash);
+
+        if (changed) {
+            // Notify leave for old route
+            for (var i = 0; i < window.__ROUTE_HANDLERS__.length; i++) {
+                var h = window.__ROUTE_HANDLERS__[i];
+                if (h.route === lastRoute && typeof h.onLeave === 'function') {
+                    try { h.onLeave(); } catch (e) { console.error('[route] onLeave error:', e); }
+                }
+            }
+            // Notify enter for new route
+            for (var j = 0; j < window.__ROUTE_HANDLERS__.length; j++) {
+                var h2 = window.__ROUTE_HANDLERS__[j];
+                if (h2.route === route && typeof h2.onEnter === 'function') {
+                    try { h2.onEnter(hash); } catch (e) { console.error('[route] onEnter error:', e); }
+                }
+            }
+        } else if (hashChanged) {
+            // Same route type but different hash (e.g. different detail page)
+            for (var k = 0; k < window.__ROUTE_HANDLERS__.length; k++) {
+                var h3 = window.__ROUTE_HANDLERS__[k];
+                if (h3.route === route && typeof h3.onHashChange === 'function') {
+                    try { h3.onHashChange(hash); } catch (e) { console.error('[route] onHashChange error:', e); }
+                }
+            }
+        }
+
+        // Tick for current route (re-injection if React removed our DOM)
+        for (var m = 0; m < window.__ROUTE_HANDLERS__.length; m++) {
+            var h4 = window.__ROUTE_HANDLERS__[m];
+            if (h4.route === route && typeof h4.onTick === 'function') {
+                try { h4.onTick(hash); } catch (e) { /* silent */ }
+            }
+        }
+
+        lastHash = hash;
+        lastRoute = route;
+    }, 600);
+})();
+</script>
+
+<!-- ----------------------------------------------------------------------------- -->
+<!-- HERO CAROUSEL COMPONENT -->
+<!-- Nyx-style hero with Ken Burns, frosted pills, auto-rotation, D-pad nav -->
+<!-- On inject: hides Stremio catalog rows. On leave: restores them. -->
+<!-- ----------------------------------------------------------------------------- -->
+<script>
+(function() {
+    'use strict';
+
+    var CINEMETA_MOVIE_URL = 'https://v3-cinemeta.strem.io/catalog/movie/top.json';
+    var HERO_COUNT = 6;
     var ROTATE_MS = 8000;
     var heroIndex = 0;
     var heroTimer = null;
-    var lastRoute = '';
+    var focusPaused = false;
+    var heroData = null;
+
+    // --- Data Fetching ---
 
     function fetchHeroData(cb) {
-        if (window.__HERO_DATA__) { cb(window.__HERO_DATA__); return; }
-        fetch(CINEMETA_URL).then(function(r) { return r.json(); }).then(function(data) {
+        if (heroData) { cb(heroData); return; }
+        if (window.__HERO_DATA__) { heroData = window.__HERO_DATA__; cb(heroData); return; }
+
+        fetch(CINEMETA_MOVIE_URL).then(function(r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        }).then(function(data) {
             var metas = (data && data.metas) ? data.metas : [];
-            if (metas.length) window.__HERO_DATA__ = metas;
-            cb(metas);
+            // Filter to items with backgrounds for hero quality
+            var withBg = [];
+            for (var i = 0; i < metas.length; i++) {
+                if (metas[i].background) withBg.push(metas[i]);
+            }
+            heroData = withBg.length >= HERO_COUNT ? withBg : metas;
+            window.__HERO_DATA__ = heroData;
+            cb(heroData);
         }).catch(function(e) {
             console.error('[hero] Fetch failed:', e);
             cb([]);
         });
     }
 
-    function truncate(str, max) {
-        if (!str) return '';
-        if (str.length <= max) return str;
-        return str.substring(0, max) + '...';
-    }
+    // --- DOM Building ---
 
     function buildHero(metas) {
         var items = metas.slice(0, HERO_COUNT);
         if (!items.length) return null;
 
+        var frag = document.createDocumentFragment();
         var wrap = document.createElement('div');
         wrap.id = 'stremio-hero';
-        wrap.style.cssText = 'position:relative;width:100%;height:55vh;overflow:hidden;margin-bottom:0.5rem;flex-shrink:0;';
 
-        // Slides container
-        var slides = document.createElement('div');
-        slides.id = 'hero-slides';
-        slides.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;';
+        var slidesContainer = document.createElement('div');
+        slidesContainer.id = 'hero-slides';
+        slidesContainer.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;';
 
         for (var i = 0; i < items.length; i++) {
             var item = items[i];
             var slide = document.createElement('div');
-            slide.className = 'hero-slide';
+            slide.className = 'hero-slide' + (i === 0 ? ' active' : '');
             slide.setAttribute('data-index', String(i));
-            slide.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;opacity:' + (i === 0 ? '1' : '0') + ';transition:opacity 0.8s ease;';
 
-            // Background image
+            // Background
             var bg = document.createElement('div');
-            bg.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;background-image:url(' + esc(item.background || item.poster || '') + ');background-size:cover;background-position:center top;';
+            bg.className = 'hero-bg';
+            var bgUrl = item.background || item.poster || '';
+            if (bgUrl) {
+                bg.style.backgroundImage = 'url(' + esc(bgUrl) + ')';
+            }
             slide.appendChild(bg);
 
-            // Gradient overlay
-            var grad = document.createElement('div');
-            grad.style.cssText = 'position:absolute;top:0;left:0;width:100%;height:100%;background:linear-gradient(to top, #0c0c10 0%, rgba(12,12,16,0.7) 40%, transparent 70%);';
-            slide.appendChild(grad);
+            // Gradients
+            var gradBottom = document.createElement('div');
+            gradBottom.className = 'hero-grad-bottom';
+            slide.appendChild(gradBottom);
 
-            // Side gradient for readability
-            var sideGrad = document.createElement('div');
-            sideGrad.style.cssText = 'position:absolute;top:0;left:0;width:60%;height:100%;background:linear-gradient(to right, rgba(12,12,16,0.8) 0%, transparent 100%);';
-            slide.appendChild(sideGrad);
+            var gradSide = document.createElement('div');
+            gradSide.className = 'hero-grad-side';
+            slide.appendChild(gradSide);
 
             // Content
             var content = document.createElement('div');
-            content.style.cssText = 'position:absolute;bottom:4rem;left:4rem;right:40%;z-index:2;';
+            content.className = 'hero-content';
 
             // Metadata pills
             var pills = document.createElement('div');
-            pills.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:0.8rem;flex-wrap:wrap;';
+            pills.className = 'hero-pills';
+
             if (item.year) {
-                var yearPill = document.createElement('span');
-                yearPill.style.cssText = 'background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.85);padding:4px 10px;border-radius:4px;font-size:0.85rem;font-family:PlusJakartaSans,sans-serif;';
-                yearPill.textContent = String(item.year);
-                pills.appendChild(yearPill);
+                var yp = document.createElement('span');
+                yp.className = 'hero-pill';
+                yp.textContent = String(item.year);
+                pills.appendChild(yp);
             }
             if (item.imdbRating) {
-                var ratingPill = document.createElement('span');
-                ratingPill.style.cssText = 'background:rgba(255,255,255,0.12);color:#fbbf24;padding:4px 10px;border-radius:4px;font-size:0.85rem;font-family:PlusJakartaSans,sans-serif;font-weight:600;';
-                ratingPill.textContent = '\u2605 ' + item.imdbRating;
-                pills.appendChild(ratingPill);
+                var rp = document.createElement('span');
+                rp.className = 'hero-pill hero-pill--rating';
+                rp.textContent = '\u2605 ' + item.imdbRating;
+                pills.appendChild(rp);
             }
             if (item.genres && item.genres.length) {
-                var genreCount = Math.min(item.genres.length, 3);
-                for (var g = 0; g < genreCount; g++) {
-                    var gPill = document.createElement('span');
-                    gPill.style.cssText = 'background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.65);padding:4px 10px;border-radius:4px;font-size:0.85rem;font-family:PlusJakartaSans,sans-serif;';
-                    gPill.textContent = item.genres[g];
-                    pills.appendChild(gPill);
+                var gc = Math.min(item.genres.length, 3);
+                for (var g = 0; g < gc; g++) {
+                    var gp = document.createElement('span');
+                    gp.className = 'hero-pill';
+                    gp.textContent = item.genres[g];
+                    pills.appendChild(gp);
                 }
             }
             content.appendChild(pills);
 
             // Title
             var title = document.createElement('div');
-            title.style.cssText = 'font-size:2.5rem;font-weight:700;color:white;margin-bottom:0.6rem;font-family:PlusJakartaSans,sans-serif;text-shadow:0 2px 8px rgba(0,0,0,0.5);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;';
+            title.className = 'hero-title';
             title.textContent = item.name || '';
             content.appendChild(title);
 
             // Description
             var desc = document.createElement('div');
-            desc.style.cssText = 'font-size:1rem;color:rgba(255,255,255,0.6);font-family:PlusJakartaSans,sans-serif;line-height:1.5;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;margin-bottom:1.2rem;max-width:500px;';
-            desc.textContent = truncate(item.description || '', 200);
+            desc.className = 'hero-desc';
+            desc.textContent = truncate(item.description || '', 180);
             content.appendChild(desc);
 
             // Buttons
             var btnRow = document.createElement('div');
-            btnRow.style.cssText = 'display:flex;gap:12px;';
+            btnRow.className = 'hero-buttons';
 
-            var watchBtn = document.createElement('button');
-            watchBtn.setAttribute('tabindex', '0');
-            watchBtn.setAttribute('data-hero-btn', 'watch');
-            watchBtn.setAttribute('data-type', item.type || 'movie');
-            watchBtn.setAttribute('data-id', item.id || '');
-            watchBtn.style.cssText = 'background:#7b5bf5;color:white;border:none;padding:10px 28px;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;font-family:PlusJakartaSans,sans-serif;transition:background 0.2s;';
-            watchBtn.textContent = 'Watch';
-            watchBtn.onfocus = function() { this.style.background = '#6d4de0'; this.style.outline = '3px solid #a78bfa'; this.style.outlineOffset = '2px'; };
-            watchBtn.onblur = function() { this.style.background = '#7b5bf5'; this.style.outline = 'none'; };
-            watchBtn.onclick = function() {
-                var t = this.getAttribute('data-type');
-                var id = this.getAttribute('data-id');
-                window.location.hash = '#/detail/' + t + '/' + id;
-            };
+            var watchBtn = createHeroButton(item, 'Watch', true);
             btnRow.appendChild(watchBtn);
 
-            var detailBtn = document.createElement('button');
-            detailBtn.setAttribute('tabindex', '0');
-            detailBtn.setAttribute('data-hero-btn', 'details');
-            detailBtn.setAttribute('data-type', item.type || 'movie');
-            detailBtn.setAttribute('data-id', item.id || '');
-            detailBtn.style.cssText = 'background:transparent;color:white;border:1px solid rgba(255,255,255,0.3);padding:10px 28px;border-radius:8px;font-size:1rem;font-weight:600;cursor:pointer;font-family:PlusJakartaSans,sans-serif;transition:background 0.2s;';
-            detailBtn.textContent = 'Details';
-            detailBtn.onfocus = function() { this.style.background = 'rgba(255,255,255,0.1)'; this.style.outline = '3px solid #a78bfa'; this.style.outlineOffset = '2px'; };
-            detailBtn.onblur = function() { this.style.background = 'transparent'; this.style.outline = 'none'; };
-            detailBtn.onclick = function() {
-                var t = this.getAttribute('data-type');
-                var id = this.getAttribute('data-id');
-                window.location.hash = '#/detail/' + t + '/' + id;
-            };
+            var detailBtn = createHeroButton(item, 'Details', false);
             btnRow.appendChild(detailBtn);
 
             content.appendChild(btnRow);
             slide.appendChild(content);
-            slides.appendChild(slide);
+            slidesContainer.appendChild(slide);
         }
 
-        wrap.appendChild(slides);
+        wrap.appendChild(slidesContainer);
 
         // Pagination dots
         var dotsWrap = document.createElement('div');
         dotsWrap.id = 'hero-dots';
-        dotsWrap.style.cssText = 'position:absolute;bottom:1.2rem;left:50%;transform:translateX(-50%);display:flex;gap:8px;z-index:3;';
         for (var d = 0; d < items.length; d++) {
             var dot = document.createElement('button');
-            dot.className = 'hero-dot';
+            dot.className = 'hero-dot' + (d === 0 ? ' active' : '');
             dot.setAttribute('data-dot', String(d));
             dot.setAttribute('tabindex', '-1');
-            dot.style.cssText = 'width:10px;height:10px;border-radius:50%;border:none;cursor:pointer;padding:0;transition:background 0.3s,transform 0.3s;' + (d === 0 ? 'background:white;transform:scale(1.2);' : 'background:rgba(255,255,255,0.3);transform:scale(1);');
-            dot.onfocus = function() { this.style.outline = '2px solid #a78bfa'; };
-            dot.onblur = function() { this.style.outline = 'none'; };
+            dot.setAttribute('aria-label', 'Slide ' + (d + 1));
             (function(idx) {
                 dot.onclick = function() { goToSlide(idx); };
             })(d);
@@ -2012,126 +2305,143 @@
         }
         wrap.appendChild(dotsWrap);
 
-        return wrap;
+        frag.appendChild(wrap);
+        return frag;
     }
 
-    function goToSlide(idx) {
-        var slides = document.querySelectorAll('.hero-slide');
-        if (!slides.length) return;
-        heroIndex = idx % slides.length;
-        for (var i = 0; i < slides.length; i++) {
-            slides[i].style.opacity = i === heroIndex ? '1' : '0';
-        }
-        var dots = document.querySelectorAll('.hero-dot');
-        for (var j = 0; j < dots.length; j++) {
-            dots[j].style.background = j === heroIndex ? 'white' : 'rgba(255,255,255,0.3)';
-            dots[j].style.transform = j === heroIndex ? 'scale(1.2)' : 'scale(1)';
-        }
-        resetTimer();
-    }
+    function createHeroButton(item, label, isPrimary) {
+        var btn = document.createElement('button');
+        btn.setAttribute('tabindex', '0');
+        btn.setAttribute('data-hero-btn', label.toLowerCase());
+        btn.setAttribute('data-type', item.type || 'movie');
+        btn.setAttribute('data-id', item.id || '');
+        btn.setAttribute('aria-label', label + ' ' + (item.name || ''));
+        btn.className = 'hero-btn ' + (isPrimary ? 'hero-btn--primary' : 'hero-btn--secondary');
+        btn.textContent = label;
 
-    function nextSlide() {
-        var slides = document.querySelectorAll('.hero-slide');
-        if (!slides.length) return;
-        goToSlide(heroIndex + 1);
-    }
-
-    function resetTimer() {
-        if (heroTimer) clearInterval(heroTimer);
-        heroTimer = setInterval(nextSlide, ROTATE_MS);
-    }
-
-    function buildTrendingRow(metas) {
-        var items = metas.slice(0, 20);
-        if (!items.length) return null;
-
-        var section = document.createElement('div');
-        section.id = 'stremio-trending';
-        section.style.cssText = 'padding:0 4rem 1.5rem 4rem;flex-shrink:0;';
-
-        var heading = document.createElement('div');
-        heading.style.cssText = 'font-size:1.3rem;font-weight:700;color:white;margin-bottom:0.8rem;font-family:PlusJakartaSans,sans-serif;';
-        heading.textContent = 'Trending Now';
-        section.appendChild(heading);
-
-        var scrollWrap = document.createElement('div');
-        scrollWrap.id = 'trending-scroll';
-        scrollWrap.style.cssText = 'display:flex;gap:12px;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;padding-bottom:8px;-webkit-overflow-scrolling:touch;';
-        scrollWrap.style.scrollbarWidth = 'none';
-
-        for (var i = 0; i < items.length; i++) {
-            var item = items[i];
-            var card = document.createElement('div');
-            card.setAttribute('tabindex', '0');
-            card.setAttribute('data-trending-id', item.id || '');
-            card.setAttribute('data-trending-type', item.type || 'movie');
-            card.className = 'trending-card';
-            card.style.cssText = 'flex:0 0 auto;width:160px;cursor:pointer;transition:transform 0.2s;position:relative;';
-
-            // Poster
-            var poster = document.createElement('img');
-            poster.setAttribute('loading', 'lazy');
-            poster.src = item.poster || '';
-            poster.alt = item.name || '';
-            poster.style.cssText = 'width:160px;height:240px;object-fit:cover;border-radius:6px;display:block;background:#1a1a2e;';
-            card.appendChild(poster);
-
-            // Rating badge
-            if (item.imdbRating) {
-                var badge = document.createElement('div');
-                badge.style.cssText = 'position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.75);color:#fbbf24;padding:2px 6px;border-radius:4px;font-size:0.75rem;font-weight:600;font-family:PlusJakartaSans,sans-serif;backdrop-filter:blur(4px);';
-                badge.textContent = '\u2605 ' + item.imdbRating;
-                card.appendChild(badge);
+        btn.onfocus = function() {
+            focusPaused = true;
+            pauseTimer();
+        };
+        btn.onblur = function() {
+            focusPaused = false;
+            startTimer();
+        };
+        btn.onclick = function() {
+            var t = this.getAttribute('data-type');
+            var id = this.getAttribute('data-id');
+            if (t && id) window.location.hash = '#/detail/' + t + '/' + id;
+        };
+        btn.onkeydown = function(e) {
+            if (e.keyCode === 13 || e.keyCode === 32) {
+                this.click();
+                e.preventDefault();
+                return;
             }
-
-            // Title
-            var cardTitle = document.createElement('div');
-            cardTitle.style.cssText = 'font-size:0.85rem;color:rgba(255,255,255,0.8);margin-top:6px;font-family:PlusJakartaSans,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;width:160px;';
-            cardTitle.textContent = item.name || '';
-            card.appendChild(cardTitle);
-
-            card.onfocus = function() { this.style.transform = 'scale(1.08)'; this.style.outline = '2px solid #7b5bf5'; this.style.outlineOffset = '2px'; this.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' }); };
-            card.onblur = function() { this.style.transform = 'scale(1)'; this.style.outline = 'none'; };
-            card.onclick = function() {
-                var t = this.getAttribute('data-trending-type');
-                var id = this.getAttribute('data-trending-id');
-                window.location.hash = '#/detail/' + t + '/' + id;
-            };
-            card.onkeydown = function(e) {
-                if (e.keyCode === 13 || e.keyCode === 32) { this.click(); e.preventDefault(); }
-            };
-
-            scrollWrap.appendChild(card);
-        }
-
-        section.appendChild(scrollWrap);
-
-        // D-pad left/right scrolling for trending row
-        scrollWrap.addEventListener('keydown', function(e) {
+            // Left/Right between hero buttons
             if (e.keyCode === 39) { // Right
-                var focused = document.activeElement;
-                if (focused && focused.nextElementSibling && focused.nextElementSibling.classList.contains('trending-card')) {
-                    focused.nextElementSibling.focus();
+                var next = this.nextElementSibling;
+                if (next && next.classList.contains('hero-btn')) {
+                    next.focus();
                     e.preventDefault();
                     e.stopPropagation();
                 }
             } else if (e.keyCode === 37) { // Left
-                var focused2 = document.activeElement;
-                if (focused2 && focused2.previousElementSibling && focused2.previousElementSibling.classList.contains('trending-card')) {
-                    focused2.previousElementSibling.focus();
+                var prev = this.previousElementSibling;
+                if (prev && prev.classList.contains('hero-btn')) {
+                    prev.focus();
                     e.preventDefault();
                     e.stopPropagation();
+                } else {
+                    // Left on first button = previous slide
+                    goToSlide(heroIndex - 1 < 0 ? HERO_COUNT - 1 : heroIndex - 1);
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            } else if (e.keyCode === 40) { // Down — move focus to trending row
+                var firstCard = document.querySelector('.trending-card');
+                if (firstCard) {
+                    firstCard.focus();
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            } else if (e.keyCode === 39 && !this.nextElementSibling) {
+                // Right on last button = next slide
+                goToSlide(heroIndex + 1);
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        };
+
+        return btn;
+    }
+
+    // --- Slide Navigation ---
+
+    function goToSlide(idx) {
+        var slides = document.querySelectorAll('#stremio-hero .hero-slide');
+        if (!slides.length) return;
+        heroIndex = ((idx % slides.length) + slides.length) % slides.length;
+
+        requestAnimationFrame(function() {
+            for (var i = 0; i < slides.length; i++) {
+                if (i === heroIndex) {
+                    slides[i].classList.add('active');
+                } else {
+                    slides[i].classList.remove('active');
+                }
+            }
+            var dots = document.querySelectorAll('#hero-dots .hero-dot');
+            for (var j = 0; j < dots.length; j++) {
+                if (j === heroIndex) {
+                    dots[j].classList.add('active');
+                } else {
+                    dots[j].classList.remove('active');
                 }
             }
         });
 
-        return section;
+        if (!focusPaused) {
+            startTimer();
+        }
     }
 
-    function injectHome() {
+    function nextSlide() {
+        goToSlide(heroIndex + 1);
+    }
+
+    function startTimer() {
+        if (heroTimer) clearInterval(heroTimer);
+        heroTimer = setInterval(nextSlide, ROTATE_MS);
+    }
+
+    function pauseTimer() {
+        if (heroTimer) { clearInterval(heroTimer); heroTimer = null; }
+    }
+
+    // --- Stremio Catalog Visibility ---
+
+    function hideCatalogs() {
+        var catalogs = document.querySelectorAll('.catalog-Aq3BF');
+        for (var i = 0; i < catalogs.length; i++) {
+            catalogs[i].setAttribute('data-hero-hidden', 'true');
+            catalogs[i].style.display = 'none';
+        }
+    }
+
+    function restoreCatalogs() {
+        var catalogs = document.querySelectorAll('[data-hero-hidden="true"]');
+        for (var i = 0; i < catalogs.length; i++) {
+            catalogs[i].style.display = '';
+            catalogs[i].removeAttribute('data-hero-hidden');
+        }
+    }
+
+    // --- Injection & Cleanup ---
+
+    function inject() {
         if (document.getElementById('stremio-hero')) return;
 
-        // Find the home page container
         var homeEl = document.querySelector('.home-qPkGc');
         if (!homeEl) return;
 
@@ -2142,194 +2452,493 @@
             if (!metas.length) return;
             if (document.getElementById('stremio-hero')) return;
 
-            var hero = buildHero(metas);
-            if (hero) {
-                contentEl.insertBefore(hero, contentEl.firstChild);
-                resetTimer();
-            }
+            // Hide Stremio's catalog rows so hero is the primary content
+            hideCatalogs();
 
-            var trending = buildTrendingRow(metas);
-            if (trending) {
-                var heroEl = document.getElementById('stremio-hero');
-                if (heroEl && heroEl.nextSibling) {
-                    contentEl.insertBefore(trending, heroEl.nextSibling);
-                } else {
-                    contentEl.appendChild(trending);
-                }
+            var heroFrag = buildHero(metas);
+            if (heroFrag) {
+                contentEl.insertBefore(heroFrag, contentEl.firstChild);
+                startTimer();
             }
         });
     }
 
     function cleanup() {
         var hero = document.getElementById('stremio-hero');
-        if (hero) hero.remove();
-        var trending = document.getElementById('stremio-trending');
-        if (trending) trending.remove();
-        if (heroTimer) { clearInterval(heroTimer); heroTimer = null; }
+        if (hero) hero.parentNode.removeChild(hero);
+        pauseTimer();
+        heroIndex = 0;
+        restoreCatalogs();
     }
 
-    // Route watcher
-    setInterval(function() {
-        var hash = window.location.hash || '';
-        var isHome = hash === '' || hash === '#/' || hash === '#/home' || hash.indexOf('#/board') === 0;
-        if (isHome && lastRoute !== 'home') {
-            lastRoute = 'home';
-            // Slight delay for DOM to render
-            setTimeout(injectHome, 500);
-        } else if (isHome) {
-            // Re-check if elements got removed by framework re-render
+    // --- Register with Route System ---
+
+    window.__ROUTE_HANDLERS__.push({
+        route: 'home',
+        onEnter: function() {
+            setTimeout(inject, 400);
+        },
+        onLeave: function() {
+            cleanup();
+        },
+        onTick: function() {
+            // Re-inject if React re-rendered and removed our hero
             if (!document.getElementById('stremio-hero')) {
-                setTimeout(injectHome, 300);
+                inject();
             }
-        } else {
-            if (lastRoute === 'home') {
-                cleanup();
+            // Re-hide catalogs if React re-rendered them
+            var hero = document.getElementById('stremio-hero');
+            if (hero) {
+                var visibleCatalogs = document.querySelectorAll('.catalog-Aq3BF:not([data-hero-hidden])');
+                if (visibleCatalogs.length > 0) {
+                    hideCatalogs();
+                }
             }
-            lastRoute = 'other';
         }
-    }, 800);
+    });
 })();
 </script>
+
+<!-- ----------------------------------------------------------------------------- -->
+<!-- TRENDING ROW COMPONENT -->
+<!-- Horizontal scrollable poster row with D-pad navigation -->
+<!-- Fetches both movies and series for variety -->
+<!-- ----------------------------------------------------------------------------- -->
 <script>
-// Enhanced Details Page — Metadata Pills
 (function() {
-    var lastDetailHash = '';
-    var injectedPills = false;
+    'use strict';
+
+    var CINEMETA_MOVIE_URL = 'https://v3-cinemeta.strem.io/catalog/movie/top.json';
+    var CINEMETA_SERIES_URL = 'https://v3-cinemeta.strem.io/catalog/series/top.json';
+    var CARD_COUNT = 20;
+    var trendingData = null;
+
+    // --- Data Fetching ---
+
+    function fetchTrendingData(cb) {
+        if (trendingData) { cb(trendingData); return; }
+
+        var moviesDone = false;
+        var seriesDone = false;
+        var movies = [];
+        var series = [];
+
+        function maybeMerge() {
+            if (!moviesDone || !seriesDone) return;
+            // Interleave movies and series for variety
+            var merged = [];
+            var mi = 0, si = 0;
+            while (merged.length < CARD_COUNT && (mi < movies.length || si < series.length)) {
+                if (mi < movies.length) merged.push(movies[mi++]);
+                if (si < series.length && merged.length < CARD_COUNT) merged.push(series[si++]);
+            }
+            trendingData = merged;
+            cb(merged);
+        }
+
+        // Reuse hero data for movies if available
+        if (window.__HERO_DATA__) {
+            movies = window.__HERO_DATA__;
+            moviesDone = true;
+        } else {
+            fetch(CINEMETA_MOVIE_URL).then(function(r) {
+                if (!r.ok) throw new Error('HTTP ' + r.status);
+                return r.json();
+            }).then(function(data) {
+                movies = (data && data.metas) ? data.metas : [];
+                window.__HERO_DATA__ = movies;
+            }).catch(function(e) {
+                console.error('[trending] Movie fetch failed:', e);
+            }).then(function() {
+                moviesDone = true;
+                maybeMerge();
+            });
+        }
+
+        fetch(CINEMETA_SERIES_URL).then(function(r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        }).then(function(data) {
+            series = (data && data.metas) ? data.metas : [];
+        }).catch(function(e) {
+            console.error('[trending] Series fetch failed:', e);
+        }).then(function() {
+            seriesDone = true;
+            maybeMerge();
+        });
+
+        // If movies were already cached, trigger merge check
+        if (moviesDone) maybeMerge();
+    }
+
+    // --- DOM Building ---
+
+    function buildTrendingRow(metas) {
+        if (!metas.length) return null;
+
+        var frag = document.createDocumentFragment();
+        var section = document.createElement('div');
+        section.id = 'stremio-trending';
+
+        // Heading with accent bar
+        var heading = document.createElement('div');
+        heading.className = 'trending-heading';
+        var accent = document.createElement('span');
+        accent.className = 'trending-accent';
+        heading.appendChild(accent);
+        var headingText = document.createTextNode('Trending Now');
+        heading.appendChild(headingText);
+        section.appendChild(heading);
+
+        // Scroll container
+        var scrollWrap = document.createElement('div');
+        scrollWrap.id = 'trending-scroll';
+
+        for (var i = 0; i < metas.length; i++) {
+            var item = metas[i];
+            var card = document.createElement('div');
+            card.className = 'trending-card';
+            card.setAttribute('tabindex', '0');
+            card.setAttribute('data-trending-id', item.id || '');
+            card.setAttribute('data-trending-type', item.type || 'movie');
+            card.setAttribute('aria-label', (item.name || '') + (item.imdbRating ? ', rated ' + item.imdbRating : ''));
+
+            // Poster image
+            var poster = document.createElement('img');
+            poster.className = 'card-poster';
+            poster.setAttribute('loading', 'lazy');
+            poster.alt = item.name || '';
+            // Use smaller poster URL if available
+            poster.src = item.poster || '';
+            poster.onerror = function() { this.style.background = '#1a1a2e'; this.removeAttribute('src'); };
+            card.appendChild(poster);
+
+            // Type badge (corner bracket style)
+            var typeBadge = document.createElement('div');
+            typeBadge.className = 'card-badge ' + (item.type === 'series' ? 'card-badge--series' : 'card-badge--movie');
+            typeBadge.textContent = item.type === 'series' ? 'Series' : 'Movie';
+            card.appendChild(typeBadge);
+
+            // Rating badge
+            if (item.imdbRating) {
+                var rBadge = document.createElement('div');
+                rBadge.className = 'card-rating';
+                rBadge.textContent = '\u2605 ' + item.imdbRating;
+                card.appendChild(rBadge);
+            }
+
+            // Title below poster
+            var cardTitle = document.createElement('div');
+            cardTitle.className = 'card-title';
+            cardTitle.textContent = item.name || '';
+            card.appendChild(cardTitle);
+
+            // Click handler
+            card.onclick = function() {
+                var t = this.getAttribute('data-trending-type');
+                var id = this.getAttribute('data-trending-id');
+                if (t && id) window.location.hash = '#/detail/' + t + '/' + id;
+            };
+            card.onkeydown = function(e) {
+                if (e.keyCode === 13 || e.keyCode === 32) {
+                    this.click();
+                    e.preventDefault();
+                    return;
+                }
+            };
+
+            scrollWrap.appendChild(card);
+        }
+
+        section.appendChild(scrollWrap);
+
+        // D-pad navigation for trending cards
+        scrollWrap.addEventListener('keydown', function(e) {
+            var focused = document.activeElement;
+            if (!focused || !focused.classList.contains('trending-card')) return;
+
+            if (e.keyCode === 39) { // Right
+                var next = focused.nextElementSibling;
+                if (next && next.classList.contains('trending-card')) {
+                    next.focus();
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            } else if (e.keyCode === 37) { // Left
+                var prev = focused.previousElementSibling;
+                if (prev && prev.classList.contains('trending-card')) {
+                    prev.focus();
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            } else if (e.keyCode === 38) { // Up — go to hero buttons
+                var heroBtn = document.querySelector('#stremio-hero .hero-btn--primary');
+                if (heroBtn) {
+                    heroBtn.focus();
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }
+            // Down is left to Stremio's native navigation below
+        });
+
+        // Ensure focused card scrolls into view
+        scrollWrap.addEventListener('focus', function(e) {
+            if (e.target && e.target.classList.contains('trending-card')) {
+                e.target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+            }
+        }, true);
+
+        frag.appendChild(section);
+        return frag;
+    }
+
+    // --- Injection & Cleanup ---
+
+    function inject() {
+        if (document.getElementById('stremio-trending')) return;
+
+        var homeEl = document.querySelector('.home-qPkGc');
+        if (!homeEl) return;
+
+        var contentEl = homeEl.querySelector('.content-BPvBy');
+        if (!contentEl) return;
+
+        fetchTrendingData(function(metas) {
+            if (!metas.length) return;
+            if (document.getElementById('stremio-trending')) return;
+
+            var trendingFrag = buildTrendingRow(metas);
+            if (trendingFrag) {
+                // Insert after hero if it exists, otherwise at top
+                var heroEl = document.getElementById('stremio-hero');
+                if (heroEl && heroEl.nextSibling) {
+                    contentEl.insertBefore(trendingFrag, heroEl.nextSibling);
+                } else if (heroEl) {
+                    contentEl.appendChild(trendingFrag);
+                } else {
+                    contentEl.insertBefore(trendingFrag, contentEl.firstChild);
+                }
+            }
+        });
+    }
+
+    function cleanup() {
+        var trending = document.getElementById('stremio-trending');
+        if (trending && trending.parentNode) trending.parentNode.removeChild(trending);
+    }
+
+    // --- Register with Route System ---
+
+    window.__ROUTE_HANDLERS__.push({
+        route: 'home',
+        onEnter: function() {
+            // Slight extra delay to let hero inject first
+            setTimeout(inject, 600);
+        },
+        onLeave: function() {
+            cleanup();
+        },
+        onTick: function() {
+            if (!document.getElementById('stremio-trending')) {
+                inject();
+            }
+        }
+    });
+})();
+</script>
+
+<!-- ----------------------------------------------------------------------------- -->
+<!-- DETAIL PAGE PILLS COMPONENT -->
+<!-- Frosted glass metadata pills injected below the title on detail pages -->
+<!-- Uses __META_CACHE__ for caching, handles React re-renders -->
+<!-- ----------------------------------------------------------------------------- -->
+<script>
+(function() {
+    'use strict';
+
+    var currentDetailHash = '';
+    var retryCount = 0;
+    var MAX_RETRIES = 8;
+
+    // --- DOM Building ---
 
     function buildPills(meta) {
+        var frag = document.createDocumentFragment();
         var container = document.createElement('div');
         container.id = 'stremio-detail-pills';
-        container.style.cssText = 'display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0.3rem 0 0.5rem 0;';
 
         // Type pill
         if (meta.type) {
-            var typePill = document.createElement('span');
-            typePill.style.cssText = 'background:rgba(123,91,245,0.25);color:#a78bfa;padding:4px 12px;border-radius:20px;font-size:0.85rem;font-family:PlusJakartaSans,sans-serif;font-weight:600;';
-            typePill.textContent = meta.type === 'movie' ? 'Movie' : meta.type === 'series' ? 'Series' : meta.type;
-            container.appendChild(typePill);
+            var tp = document.createElement('span');
+            tp.className = 'detail-pill detail-pill--type';
+            tp.textContent = meta.type === 'movie' ? 'Movie' : meta.type === 'series' ? 'Series' : meta.type;
+            container.appendChild(tp);
         }
 
         // Year pill
-        if (meta.year) {
-            var yearPill = document.createElement('span');
-            yearPill.style.cssText = 'background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.75);padding:4px 12px;border-radius:20px;font-size:0.85rem;font-family:PlusJakartaSans,sans-serif;';
-            yearPill.textContent = String(meta.year);
-            container.appendChild(yearPill);
+        if (meta.releaseInfo || meta.year) {
+            var yp = document.createElement('span');
+            yp.className = 'detail-pill detail-pill--default';
+            yp.textContent = String(meta.releaseInfo || meta.year);
+            container.appendChild(yp);
         }
 
         // Runtime pill
         if (meta.runtime) {
-            var rtPill = document.createElement('span');
-            rtPill.style.cssText = 'background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.75);padding:4px 12px;border-radius:20px;font-size:0.85rem;font-family:PlusJakartaSans,sans-serif;';
-            rtPill.textContent = meta.runtime;
-            container.appendChild(rtPill);
+            var rtp = document.createElement('span');
+            rtp.className = 'detail-pill detail-pill--default';
+            rtp.textContent = meta.runtime;
+            container.appendChild(rtp);
         }
 
-        // Rating pill
+        // IMDb rating pill
         if (meta.imdbRating) {
-            var rPill = document.createElement('span');
-            rPill.style.cssText = 'background:rgba(251,191,36,0.15);color:#fbbf24;padding:4px 12px;border-radius:20px;font-size:0.85rem;font-family:PlusJakartaSans,sans-serif;font-weight:600;';
-            rPill.textContent = '\u2605 ' + meta.imdbRating;
-            container.appendChild(rPill);
+            var rp = document.createElement('span');
+            rp.className = 'detail-pill detail-pill--rating';
+            rp.textContent = '\u2605 ' + meta.imdbRating;
+            container.appendChild(rp);
         }
 
-        // Genre pills
+        // Genre pills (max 4)
         if (meta.genres && meta.genres.length) {
-            var genreCount = Math.min(meta.genres.length, 4);
-            for (var i = 0; i < genreCount; i++) {
-                var gPill = document.createElement('span');
-                gPill.style.cssText = 'background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.55);padding:4px 12px;border-radius:20px;font-size:0.85rem;font-family:PlusJakartaSans,sans-serif;';
-                gPill.textContent = meta.genres[i];
-                container.appendChild(gPill);
+            var gc = Math.min(meta.genres.length, 4);
+            for (var i = 0; i < gc; i++) {
+                var gp = document.createElement('span');
+                gp.className = 'detail-pill detail-pill--genre';
+                gp.textContent = meta.genres[i];
+                container.appendChild(gp);
             }
         }
 
-        return container;
+        frag.appendChild(container);
+        return frag;
     }
 
-    function injectDetailPills() {
-        if (document.getElementById('stremio-detail-pills')) return;
+    function insertPills(meta) {
+        if (document.getElementById('stremio-detail-pills')) return true;
 
-        var detailEl = document.querySelector('.details-omgjE');
-        if (!detailEl) return;
-
-        var infoEl = detailEl.querySelector('.info-c3Gsa');
-        if (!infoEl) return;
+        // Find Stremio's detail page info section
+        var infoEl = document.querySelector('.info-c3Gsa');
+        if (!infoEl) return false;
 
         var titleEl = infoEl.querySelector('.title-OL31B');
+        if (!titleEl) return false;
+
         var descEl = infoEl.querySelector('.description-Vy9xR');
-        if (!titleEl) return;
+        var pillsFrag = buildPills(meta);
 
-        // Extract meta ID from hash
-        var hash = window.location.hash || '';
-        var parts = hash.replace('#/detail/', '').split('/');
-        if (parts.length < 2) return;
-        var type = parts[0];
-        var metaId = parts[1];
+        if (descEl) {
+            infoEl.insertBefore(pillsFrag, descEl);
+        } else if (titleEl.nextSibling) {
+            infoEl.insertBefore(pillsFrag, titleEl.nextSibling);
+        } else {
+            infoEl.appendChild(pillsFrag);
+        }
+        return true;
+    }
 
-        // Fetch meta from Cinemeta (cached)
+    // --- Data Fetching ---
+
+    function fetchAndInject(type, metaId) {
         var cacheKey = type + '/' + metaId;
-        if (window.__META_CACHE__[cacheKey]) {
-            var cached = window.__META_CACHE__[cacheKey];
-            if (!document.getElementById('stremio-detail-pills')) {
-                var cp = buildPills(cached);
-                if (cp) { var te = document.querySelector('.title-OL31B'); if (te && te.parentNode) te.parentNode.insertBefore(cp, te.nextSibling); }
-            }
+
+        // Check cache first
+        if (window.__META_CACHE__ && window.__META_CACHE__[cacheKey]) {
+            insertPills(window.__META_CACHE__[cacheKey]);
             return;
         }
-        var apiUrl = 'https://v3-cinemeta.strem.io/meta/' + encodeURIComponent(type) + '/' + encodeURIComponent(metaId) + '.json';
-        fetch(apiUrl).then(function(r) { return r.json(); }).then(function(data) {
-            if (data && data.meta) window.__META_CACHE__[cacheKey] = data.meta;
-            if (!data || !data.meta) return;
-            if (document.getElementById('stremio-detail-pills')) return;
 
-            var pills = buildPills(data.meta);
-            // Insert after title, before description
-            if (descEl) {
-                infoEl.insertBefore(pills, descEl);
-            } else {
-                if (titleEl.parentNode) titleEl.parentNode.insertBefore(pills, titleEl.nextSibling);
+        var apiUrl = 'https://v3-cinemeta.strem.io/meta/' + encodeURIComponent(type) + '/' + encodeURIComponent(metaId) + '.json';
+
+        fetch(apiUrl).then(function(r) {
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            return r.json();
+        }).then(function(data) {
+            if (!data || !data.meta) return;
+
+            // Cache the meta
+            if (window.__META_CACHE__) {
+                window.__META_CACHE__[cacheKey] = data.meta;
             }
-            injectedPills = true;
+
+            // Only inject if we're still on the same detail page
+            var currentHash = window.location.hash || '';
+            if (currentHash.indexOf('#/detail/' + type + '/' + metaId) !== 0) return;
+
+            if (!insertPills(data.meta)) {
+                // DOM not ready yet, will retry on next tick
+                retryCount = 0;
+            }
         }).catch(function(e) {
             console.error('[detail-pills] Fetch failed:', e);
         });
     }
 
-    function cleanupPills() {
-        var pills = document.getElementById('stremio-detail-pills');
-        if (pills) pills.remove();
-        injectedPills = false;
+    // --- Parse Detail Hash ---
+
+    function parseDetailHash(hash) {
+        // Format: #/detail/{type}/{id} or #/detail/{type}/{id}/{videoId}
+        var match = hash.replace('#/detail/', '').split('/');
+        if (match.length < 2) return null;
+        return { type: match[0], id: match[1] };
     }
 
-    setInterval(function() {
-        var hash = window.location.hash || '';
-        var isDetail = hash.indexOf('#/detail/') === 0;
-        if (isDetail) {
-            if (hash !== lastDetailHash) {
-                cleanupPills();
-                lastDetailHash = hash;
-                setTimeout(injectDetailPills, 600);
-            } else if (!injectedPills && !document.getElementById('stremio-detail-pills')) {
-                setTimeout(injectDetailPills, 400);
-            }
-        } else {
-            if (lastDetailHash) {
-                cleanupPills();
-                lastDetailHash = '';
+    // --- Injection & Cleanup ---
+
+    function inject(hash) {
+        var parsed = parseDetailHash(hash);
+        if (!parsed) return;
+        retryCount = 0;
+        currentDetailHash = hash;
+
+        // Small delay for Stremio's React to render the detail page
+        setTimeout(function() {
+            fetchAndInject(parsed.type, parsed.id);
+        }, 500);
+    }
+
+    function cleanup() {
+        var pills = document.getElementById('stremio-detail-pills');
+        if (pills && pills.parentNode) pills.parentNode.removeChild(pills);
+        currentDetailHash = '';
+        retryCount = 0;
+    }
+
+    // --- Register with Route System ---
+
+    window.__ROUTE_HANDLERS__.push({
+        route: 'detail',
+        onEnter: function(hash) {
+            inject(hash);
+        },
+        onLeave: function() {
+            cleanup();
+        },
+        onHashChange: function(hash) {
+            // Different detail page — clean up and re-inject
+            cleanup();
+            inject(hash);
+        },
+        onTick: function(hash) {
+            // Handle React re-renders that remove our pills
+            if (!document.getElementById('stremio-detail-pills') && currentDetailHash === hash) {
+                retryCount++;
+                if (retryCount <= MAX_RETRIES) {
+                    var parsed = parseDetailHash(hash);
+                    if (parsed) {
+                        var cacheKey = parsed.type + '/' + parsed.id;
+                        if (window.__META_CACHE__ && window.__META_CACHE__[cacheKey]) {
+                            insertPills(window.__META_CACHE__[cacheKey]);
+                        }
+                    }
+                }
             }
         }
-    }, 800);
+    });
 })();
 </script>
-<script>
-// Hide scrollbars for trending row (CSS injection)
-(function() {
-    var style = document.createElement('style');
-    style.textContent = '#trending-scroll::-webkit-scrollbar{display:none}#trending-scroll{-ms-overflow-style:none;scrollbar-width:none}.trending-card:focus{outline:2px solid #7b5bf5 !important;outline-offset:2px;}.hero-slide img{-webkit-user-drag:none;}';
-    document.head.appendChild(style);
-})();
-</script>
+
 
 <script>
     // Detect VIDAA TV with 720p viewport
