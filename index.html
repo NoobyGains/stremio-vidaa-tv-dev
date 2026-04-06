@@ -137,10 +137,10 @@
         --nyx-duration-normal: .25s;
         --nyx-duration-slow: .4s;
 
-        /* Sidebar layout — Nyx floating pill (5.5rem wide, 1.5rem margin) */
-        --nyx-sidebar-w: 5.5rem;
-        --nyx-sidebar-m: 1.5rem;
-        --nyx-sidebar-safe: calc(var(--nyx-sidebar-w) + var(--nyx-sidebar-m) * 2);
+        /* Sidebar layout — Nyx edge-locked (60px wide, flush to left) */
+        --nyx-sidebar-w: 60px;
+        --nyx-sidebar-m: 0px;
+        --nyx-sidebar-safe: 60px;
         --nyx-content-pad: var(--nyx-sp-8);
     }
 
@@ -220,37 +220,29 @@
     }
 
     /* ===================================================================
-       5. NAVBAR → FLOATING PILL SIDEBAR (Nyx main sidebar)
-       Nyx: 5.5rem wide, 1.5rem margin from edges, border-radius 2.5rem
+       5. NAVBAR → EDGE-LOCKED SIDEBAR (Nyx main sidebar)
+       Nyx: 60px wide, flush to left edge, no border-radius
        No backdrop-filter (ARM GPU perf) — solid dark glass instead
        =================================================================== */
     .navbar-NNb1c {
         position: fixed !important;
-        left: var(--nyx-sidebar-m) !important;
-        top: var(--nyx-sidebar-m) !important;
-        bottom: var(--nyx-sidebar-m) !important;
+        left: 0 !important;
+        top: 0 !important;
+        bottom: 0 !important;
         right: auto !important;
-        width: var(--nyx-sidebar-w) !important;
-        height: calc(100vh - var(--nyx-sidebar-m) * 2) !important;
+        width: 60px !important;
+        height: 100vh !important;
         flex-direction: column !important;
         display: flex !important;
         align-items: center !important;
         z-index: 1000 !important;
-        /* Solid glass look without backdrop-filter for ARM perf */
-        background: rgba(15,15,20,.55) !important;
-        border: 1px solid rgba(255,255,255,.05) !important;
-        border-radius: var(--nyx-radius-sidebar) !important;
+        background: rgba(10,10,18,.75) !important;
+        border: none !important;
+        border-right: 1px solid rgba(255,255,255,.05) !important;
+        border-radius: 0 !important;
         padding: var(--nyx-sp-6) 0 !important;
         overflow: hidden !important;
-        box-shadow: 0 0 40px rgba(0,0,0,.3) !important;
-        transition: background-color var(--nyx-duration-slow) var(--nyx-ease-out),
-                    border-color var(--nyx-duration-slow) var(--nyx-ease-out) !important;
-    }
-
-    /* Subtle hover lift on sidebar */
-    .navbar-NNb1c:hover {
-        background: rgba(20,20,28,.65) !important;
-        border-color: rgba(255,255,255,.08) !important;
+        box-shadow: none !important;
     }
 
     /* Hide navbar's native background layers */
@@ -302,13 +294,13 @@
         padding: 0 !important;
     }
 
-    /* Individual tab — Nyx nav-item: 3.5rem round circle, icon centered */
+    /* Individual tab — Nyx nav-item: 2.5rem round circle, icon centered */
     .tab-jVZYR {
         flex-direction: column !important;
         align-items: center !important;
         justify-content: center !important;
-        width: 3.5rem !important;
-        height: 3.5rem !important;
+        width: 2.5rem !important;
+        height: 2.5rem !important;
         border-radius: 50% !important;
         padding: 0 !important;
         margin: 0 !important;
@@ -348,39 +340,28 @@
         opacity: 1 !important;
     }
 
-    /* Selected tab — Nyx active: red glow behind icon */
+    /* Selected tab — Nyx active: subtle white background */
     .tab-jVZYR.selected-L5m7b {
-        background: transparent !important;
+        background: rgba(255,255,255,.1) !important;
     }
 
     .tab-jVZYR.selected-L5m7b .icon-SZKt5 {
         opacity: 1 !important;
-        filter: drop-shadow(0 0 4px rgba(255,255,255,.25)) !important;
+        filter: brightness(1.5) !important;
     }
 
-    /* Red glow indicator behind active tab (Nyx active-glow) */
+    /* No red glow pseudo-element on active tab */
     .tab-jVZYR.selected-L5m7b::before {
-        content: '' !important;
-        position: absolute !important;
-        top: 50% !important;
-        left: 50% !important;
-        transform: translate(-50%, -50%) !important;
-        width: 2.5rem !important;
-        height: 2.5rem !important;
-        background: radial-gradient(circle, rgba(229,9,20,.8), rgba(180,7,16,.25)) !important;
-        border-radius: 50% !important;
-        z-index: -1 !important;
-        filter: blur(8px) !important;
-        opacity: 0.7 !important;
+        display: none !important;
     }
 
     /* ===================================================================
-       5b. CONTENT OFFSET — Push all pages right to clear sidebar
+       5b. CONTENT OFFSET — Push all pages right to clear 60px sidebar
        =================================================================== */
-    /* Main content containers — offset by sidebar safe zone */
+    /* Main content containers — offset by 60px sidebar */
     #root > div > div:not(.navbar-NNb1c):not(.player-SmYw4) {
-        margin-left: var(--nyx-sidebar-safe) !important;
-        width: calc(100% - var(--nyx-sidebar-safe)) !important;
+        margin-left: 60px !important;
+        width: calc(100% - 60px) !important;
     }
 
     /* Reset inner page margins (they sit inside the offset container) */
@@ -396,7 +377,7 @@
 
     /* Fallback: ensure page wrapper itself also clears sidebar if offset rule misses it */
     .page-jI4PO {
-        padding-left: var(--nyx-sidebar-safe) !important;
+        padding-left: 60px !important;
         box-sizing: border-box !important;
     }
 
@@ -514,7 +495,7 @@
     .title-OL31B {
         font-size: var(--nyx-text-4xl) !important;
         font-weight: 800 !important;
-        font-style: normal !important;
+        font-style: italic !important;
         letter-spacing: -0.02em !important;
         line-height: var(--nyx-leading-tight) !important;
         color: var(--nyx-text-primary) !important;
@@ -2103,14 +2084,14 @@
         '#stremio-hero .hero-pills { display:flex; align-items:center; gap:8px; margin-bottom:0.8rem; flex-wrap:wrap; }',
         '#stremio-hero .hero-pill { background:rgba(255,255,255,0.1); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); color:rgba(255,255,255,0.85); padding:4px 12px; border-radius:20px; font-size:0.85rem; font-family:PlusJakartaSans,sans-serif; border:1px solid rgba(255,255,255,0.08); }',
         '#stremio-hero .hero-pill--rating { color:#fbbf24; font-weight:600; background:rgba(251,191,36,0.12); border-color:rgba(251,191,36,0.15); }',
-        '#stremio-hero .hero-title { font-size:2.8rem; font-weight:800; color:white; margin-bottom:0.5rem; font-family:PlusJakartaSans,sans-serif; text-shadow:0 2px 12px rgba(0,0,0,0.6); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; background:linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.8) 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }',
+        '#stremio-hero .hero-title { font-size:2.8rem; font-weight:700; color:white; margin-bottom:0.6rem; font-family:PlusJakartaSans,sans-serif; font-style:italic; text-shadow:0 2px 12px rgba(0,0,0,0.6); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }',
         '#stremio-hero .hero-desc { font-size:1rem; color:rgba(255,255,255,0.6); font-family:PlusJakartaSans,sans-serif; line-height:1.6; display:-webkit-box; -webkit-box-orient:vertical; -webkit-line-clamp:3; overflow:hidden; margin-bottom:1.4rem; max-width:520px; }',
         '#stremio-hero .hero-buttons { display:flex; gap:12px; }',
-        '#stremio-hero .hero-btn { border:none; padding:12px 32px; border-radius:10px; font-size:1rem; font-weight:600; cursor:pointer; font-family:PlusJakartaSans,sans-serif; transition:transform 0.15s ease, box-shadow 0.2s ease, background 0.2s ease; outline:none; }',
-        '#stremio-hero .hero-btn--primary { background:linear-gradient(135deg, #7b5bf5, #6d4de0); color:white; box-shadow:0 4px 15px rgba(123,91,245,0.3); }',
-        '#stremio-hero .hero-btn--primary:focus { transform:scale(1.05); box-shadow:0 0 0 3px rgba(167,139,250,0.5), 0 4px 20px rgba(123,91,245,0.4); }',
-        '#stremio-hero .hero-btn--secondary { background:rgba(255,255,255,0.08); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); color:white; border:1px solid rgba(255,255,255,0.15); }',
-        '#stremio-hero .hero-btn--secondary:focus { transform:scale(1.05); box-shadow:0 0 0 3px rgba(167,139,250,0.5); background:rgba(255,255,255,0.15); }',
+        '#stremio-hero .hero-btn { border:none; padding:10px 28px; border-radius:25px; font-size:0.95rem; font-weight:600; cursor:pointer; font-family:PlusJakartaSans,sans-serif; transition:transform 0.15s ease, box-shadow 0.2s ease; outline:none; }',
+        '#stremio-hero .hero-btn--primary { background:rgba(255,255,255,0.95); color:#111; }',
+        '#stremio-hero .hero-btn--primary:focus { transform:scale(1.05); box-shadow:0 0 0 3px rgba(255,255,255,0.4); }',
+        '#stremio-hero .hero-btn--secondary { background:rgba(255,255,255,0.12); color:white; border:1px solid rgba(255,255,255,0.2); }',
+        '#stremio-hero .hero-btn--secondary:focus { transform:scale(1.05); box-shadow:0 0 0 3px rgba(255,255,255,0.2); }',
         '#hero-dots { position:absolute; bottom:1.5rem; left:50%; transform:translateX(-50%); display:flex; gap:8px; z-index:3; }',
         '#hero-dots .hero-dot { width:8px; height:8px; border-radius:50%; border:none; cursor:pointer; padding:0; transition:background 0.3s, width 0.3s; background:rgba(255,255,255,0.3); }',
         '#hero-dots .hero-dot.active { background:white; width:24px; border-radius:4px; }',
