@@ -169,15 +169,15 @@
     }
 
     /* ----- 2. FOCUS RING — D-pad high visibility ----- */
-    /* Primary focus: bold purple ring for all focusable elements */
+    /* Primary focus: purple ring for all focusable elements */
     [focused],
     :focus-visible {
-        outline: 3px solid var(--nyx-accent) !important;
-        outline-offset: 3px !important;
+        outline: 2px solid var(--nyx-accent) !important;
+        outline-offset: 2px !important;
     }
 
     :focus {
-        outline: 2px solid var(--nyx-accent) !important;
+        outline: 2px solid rgba(123,91,245,.6) !important;
         outline-offset: 2px !important;
     }
 
@@ -186,8 +186,16 @@
     button[focused],
     [role="button"]:focus,
     [role="button"][focused] {
-        outline: 3px solid #a78bfa !important;
-        outline-offset: 3px !important;
+        outline: 2px solid #a78bfa !important;
+        outline-offset: 2px !important;
+    }
+
+    /* Cards: border glow only, no outline ring stacked on top */
+    .item-_uIl6[focused],
+    .item-_uIl6:focus {
+        outline: none !important;
+        border-color: rgba(123,91,245,.5) !important;
+        box-shadow: 0 0 12px rgba(123,91,245,.25) !important;
     }
 
     /* Override Stremio's focused attribute styling */
@@ -386,6 +394,12 @@
         padding-left: 0 !important;
     }
 
+    /* Fallback: ensure page wrapper itself also clears sidebar if offset rule misses it */
+    .page-jI4PO {
+        padding-left: var(--nyx-sidebar-safe) !important;
+        box-sizing: border-box !important;
+    }
+
     /* ===================================================================
        6. HOME PAGE — Clean catalog rows, no hero conflict
        =================================================================== */
@@ -393,9 +407,15 @@
         background-color: transparent !important;
         background: transparent !important;
         width: 100% !important;
-        padding: var(--nyx-sp-6) 0 0 0 !important;
+        padding: 0 !important;
         overflow-y: auto !important;
         overflow-x: hidden !important;
+    }
+
+    /* Hide the item-preview panel on home page — it sits above the hero and creates "junk" */
+    .home-qPkGc > .item-preview-nq13h,
+    .home-qPkGc .item-preview-nq13h {
+        display: none !important;
     }
 
     .home-qPkGc .content-BPvBy {
@@ -494,9 +514,11 @@
     .title-OL31B {
         font-size: var(--nyx-text-4xl) !important;
         font-weight: 800 !important;
+        font-style: normal !important;
         letter-spacing: -0.02em !important;
         line-height: var(--nyx-leading-tight) !important;
         color: var(--nyx-text-primary) !important;
+        -webkit-text-fill-color: var(--nyx-text-primary) !important;
         text-shadow: 0 2px 20px rgba(0,0,0,.6) !important;
         margin-bottom: var(--nyx-sp-4) !important;
     }
@@ -546,7 +568,7 @@
     }
 
     /* ===================================================================
-       8. DISCOVER / BROWSE PAGE — Full-width card grid
+       8. DISCOVER / BROWSE PAGE — Poster grid with constrained cards
        =================================================================== */
     .discover-sKRNy {
         background: transparent !important;
@@ -559,12 +581,42 @@
 
     /* Fix title truncation on discover */
     .discover-sKRNy .title-EqKoF,
-    .discover-sKRNy [class*="title"],
     .discover-sKRNy [class*="heading"] {
         white-space: normal !important;
         overflow: visible !important;
         text-overflow: unset !important;
         max-width: 100% !important;
+    }
+
+    /* Discover/Library card containers — horizontal scroll rows */
+    .discover-sKRNy [class*="scroll-content"],
+    .library-J0Lti [class*="scroll-content"] {
+        display: flex !important;
+        flex-wrap: nowrap !important;
+        gap: var(--nyx-sp-3) !important;
+    }
+
+    /* Constrain card width in discover/library — poster aspect ratio */
+    .discover-sKRNy .item-_uIl6,
+    .library-J0Lti .item-_uIl6 {
+        flex: 0 0 180px !important;
+        width: 180px !important;
+        max-width: 180px !important;
+        min-width: 0 !important;
+    }
+
+    .discover-sKRNy .poster-kFYpD,
+    .library-J0Lti .poster-kFYpD {
+        width: 180px !important;
+        height: 270px !important;
+        aspect-ratio: 2/3 !important;
+    }
+
+    .discover-sKRNy .poster-kFYpD img,
+    .library-J0Lti .poster-kFYpD img {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover !important;
     }
 
     /* ===================================================================
@@ -606,11 +658,12 @@
         overflow-y: auto !important;
     }
 
-    /* Remove any gradient overlays on settings */
-    .settings-jvCLz::before,
-    .settings-jvCLz::after {
-        display: none !important;
+    /* Kill the white gradient on settings heading */
+    .heading-_TKTx,
+    .settings-jvCLz [class*="heading"] {
         background: none !important;
+        background-image: none !important;
+        color: var(--nyx-text-primary) !important;
     }
 
     /* Settings option rows */
@@ -836,6 +889,11 @@
        16. ITEM PREVIEW POPUP — Modal overlay, backdrop-filter OK
        =================================================================== */
     .item-preview-nq13h {
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 50 !important;
         background: var(--nyx-surface-modal) !important;
         border-radius: var(--nyx-radius-2xl) !important;
         border: 1px solid var(--nyx-glass-border) !important;
@@ -1108,11 +1166,11 @@
 
     /* ===================================================================
        30. FOCUSED ELEMENT GLOW — TV D-pad enhancement
-       Cards get a pulsing purple glow when focused via D-pad
+       Cards get a subtle glow when focused via D-pad (no pulse animation)
        =================================================================== */
     .item-_uIl6[focused] {
-        animation: pulseGlow 2s ease-in-out infinite !important;
-        box-shadow: 0 0 0 2px var(--nyx-accent), 0 8px 24px rgba(0,0,0,.4) !important;
+        animation: none !important;
+        box-shadow: 0 0 12px rgba(123,91,245,.25), 0 8px 24px rgba(0,0,0,.4) !important;
     }
 
     .stream-rpXLF[focused] {
