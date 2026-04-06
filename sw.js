@@ -1,4 +1,4 @@
-var CACHE_NAME = 'stremio-vidaa-v7';
+var CACHE_NAME = 'stremio-vidaa-v8';
 var ASSETS = [
   './',
   './index.html',
